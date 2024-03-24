@@ -16,10 +16,16 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 class SubCategory(models.Model):
+    parent = models.ForeignKey(Category, blank=True, on_delete=models.CASCADE)
     name = models.CharField(null=False, max_length=50)
     def __str__(self):
         return self.name
 class Sector(models.Model):
+    name = models.CharField(null=False, max_length=50)
+    def __str__(self):
+        return self.name
+class SubSector(models.Model):
+    parent = models.ForeignKey(Sector, blank=True, on_delete=models.CASCADE)
     name = models.CharField(null=False, max_length=50)
     def __str__(self):
         return self.name
@@ -29,12 +35,14 @@ class RentalCompany(models.Model):
         return self.name
 class Asset(models.Model):
     name = models.CharField(null=False, max_length=50)
-    category = models.OneToOneField(Category, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
     modified = models.DateTimeField(auto_now_add=True)
     added = models.DateTimeField(auto_now_add=True)
     details = models.TextField(null=True)
-    sector = models.OneToOneField(Sector, on_delete=models.CASCADE)
-    rental_company = models.OneToOneField(RentalCompany, on_delete=models.CASCADE)
+    sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
+    subsector = models.ForeignKey(SubSector, blank=True, on_delete=models.CASCADE)
+    rental_company = models.ForeignKey(RentalCompany, on_delete=models.CASCADE)
     internal_code1 = models.CharField(null=True, max_length=50)
     internal_code2 = models.CharField(null=True, max_length=50)
     internal_code3 = models.CharField(null=True, max_length=50)
@@ -55,7 +63,7 @@ class AssetQR(models.Model):
     def __str__(self):
         return self.name
 class AssetHistory(models.Model):
-    asset_id = models.OneToOneField(Asset, on_delete=models.CASCADE)
+    asset_id = models.ForeignKey(Asset, on_delete=models.CASCADE)
     modification_type = models.CharField(null=False, max_length=50)
     name = models.CharField(null=False, max_length=50)
     category = models.CharField(null=False, max_length=50)
@@ -73,4 +81,5 @@ class AssetHistory(models.Model):
     windows_license = models.CharField(null=True, max_length=50)
     def __str__(self):
         return self.name
+
 

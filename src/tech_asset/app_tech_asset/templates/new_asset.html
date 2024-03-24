@@ -1,0 +1,42 @@
+<h1>Novo Ativo</h1>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+    $(document).ready(function(){
+        $('#id_setor').change(function(){
+            var sector_id = $(this).val();
+            $.ajax({
+                url: '/get_subsectors/',
+                data: {'sector_id': sector_id},
+                dataType: 'json',
+                success: function(data){
+                    $('#id_subsetor').empty();
+                    $.each(data.subsectors, function(index, subsector){
+                        $('#id_subsetor').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                    });
+                }
+            });
+        });
+        $('#id_categoria').change(function(){
+            var category_id = $(this).val();
+            $.ajax({
+                url: '/get_subcategories/',
+                data: {'category_id': category_id},
+                dataType: 'json',
+                success: function(data){
+                    $('#id_subcategoria').empty(); // Corrigido aqui
+                    $.each(data.subcategories, function(index, subcategory){
+                        $('#id_subcategoria').append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>'); // Corrigido aqui
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+
+<form method="post">
+    {% csrf_token %}
+    {{ asset_form.as_p }}  <!-- Renderize o formulário como parágrafos -->
+    <button type="submit">Submit</button>
+</form>

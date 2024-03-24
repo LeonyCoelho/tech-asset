@@ -1,7 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, GlobalSettings, Category, SubCategory, Sector, RentalCompany, Asset, Kit, AssetQR, AssetHistory
-
-# Register your models here.
+from .models import CustomUser, GlobalSettings, Category, SubCategory, Sector,SubSector, RentalCompany, Asset, Kit, AssetQR, AssetHistory
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
@@ -21,6 +19,10 @@ class SubCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Sector)
 class SectorAdmin(admin.ModelAdmin):
+    list_display = ['name']
+
+@admin.register(SubSector)
+class SubSectorAdmin(admin.ModelAdmin):
     list_display = ['name']
 
 @admin.register(RentalCompany)
