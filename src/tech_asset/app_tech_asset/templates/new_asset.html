@@ -1,42 +1,120 @@
-<h1>Novo Ativo</h1>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
 
-<script>
-    $(document).ready(function(){
-        $('#id_setor').change(function(){
-            var sector_id = $(this).val();
-            $.ajax({
-                url: '/get_subsectors/',
-                data: {'sector_id': sector_id},
-                dataType: 'json',
-                success: function(data){
-                    $('#id_subsetor').empty();
-                    $.each(data.subsectors, function(index, subsector){
-                        $('#id_subsetor').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
-                    });
-                }
+    <h1>Novo Ativo</h1>
+    
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            console.log("Document ready");
+            $('#id_sector').change(function(){
+                console.log("Setor change event");
+                var sector_id = $(this).val();
+                $.ajax({
+                    url: '/get_subsectors/',
+                    data: {'sector_id': sector_id},
+                    dataType: 'json',
+                    success: function(data){
+                        console.log("Subsectors received:", data.subsectors);
+                        $('#id_subsector').empty();
+                        $.each(data.subsectors, function(index, subsector){
+                            $('#id_subsector').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error);
+                    }
+                });
+            });
+            $('#id_category').change(function(){
+                console.log("Categoria change event");
+                var category_id = $(this).val();
+                $.ajax({
+                    url: '/get_subcategories/',
+                    data: {'category_id': category_id},
+                    dataType: 'json',
+                    success: function(data){
+                        console.log("Subcategories received:", data.subcategories);
+                        $('#id_subcategory').empty();
+                        $.each(data.subcategories, function(index, subcategory){
+                            $('#id_subcategory').append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>');
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error);
+                    }
+                });
             });
         });
-        $('#id_categoria').change(function(){
-            var category_id = $(this).val();
-            $.ajax({
-                url: '/get_subcategories/',
-                data: {'category_id': category_id},
-                dataType: 'json',
-                success: function(data){
-                    $('#id_subcategoria').empty(); // Corrigido aqui
-                    $.each(data.subcategories, function(index, subcategory){
-                        $('#id_subcategoria').append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>'); // Corrigido aqui
-                    });
-                }
-            });
-        });
-    });
-</script>
+    </script>
+    
 
 
-<form method="post">
-    {% csrf_token %}
-    {{ asset_form.as_p }}  <!-- Renderize o formulário como parágrafos -->
-    <button type="submit">Submit</button>
-</form>
+    <form method="post">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-12">
+                {{ asset_form.name.label_tag }}
+                {{ asset_form.name }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                {{ asset_form.category.label_tag }}
+                {{ asset_form.category }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.subcategory.label_tag }}
+                {{ asset_form.subcategory }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.sector.label_tag }}
+                {{ asset_form.sector }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.subsector.label_tag }}
+                {{ asset_form.subsector }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                {{ asset_form.rental_company.label_tag }}
+                {{ asset_form.rental_company }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.internal_code1.label_tag }}
+                {{ asset_form.internal_code1 }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.internal_code2.label_tag }}
+                {{ asset_form.internal_code2 }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.internal_code3.label_tag }}
+                {{ asset_form.internal_code3 }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3">
+                {{ asset_form.serial_number.label_tag }}
+                {{ asset_form.serial_number }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.brand.label_tag }}
+                {{ asset_form.brand }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.mac_address.label_tag }}
+                {{ asset_form.mac_address }}
+            </div>
+            <div class="col-md-3">
+                {{ asset_form.windows_license.label_tag }}
+                {{ asset_form.windows_license }}
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Submit</button>
+    </form>
+    
+</div>
+{% endblock %}

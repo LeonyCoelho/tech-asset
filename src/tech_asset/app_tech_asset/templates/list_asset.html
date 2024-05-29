@@ -1,6 +1,587 @@
-<h1>Lista de Ativos</h1>
-{% for asset in asset_list %}
-<ul>
-    <li>{{ asset.name }}</li>
-</ul>
-{% endfor %}
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<script src="{% static 'js/jsQR.js' %}"></script>
+<script>
+    console.log("jsQR script loaded: ", typeof jsQR !== 'undefined');
+</script>
+
+
+<div class="container mt-5">
+    <div class="accordion" id="accBtns">
+        <div class="">
+            <div class="row">
+                <div class="col-3">
+                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collNewAsset" aria-expanded="false" aria-controls="collNewAsset">
+                        <div class="card-body">
+                            <h4 id="headNewAsset">
+                                Novo Ativo
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collSector" aria-expanded="false" aria-controls="collSector">
+                        <div class="card-body">
+                            <h4 id="headSector">
+                                Setores
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collKit" aria-expanded="false" aria-controls="collKit">
+                        <div class="card-body">
+                            <h4 id="headKit">
+                                Kits
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-3">
+                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <div class="card-body">
+                            <h4 id="headingThree">
+                                Accordion Item #3
+                            </h4>
+                        </div>
+                    </div>
+                </div>                
+
+                <div class="col-3">
+                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                        <div class="card-body">
+                            <h4 id="headingThree">
+                                Accordion Item #3
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+<!-- ===================================== NEW ASSET ============================= -->
+
+            <div id="collNewAsset" class="accordion-collapse collapse" aria-labelledby="headNewAsset" data-bs-parent="#accBtns">
+                <div class="card">
+                        <div class="card-header">
+                            Novo Ativo
+                        </div>
+                        <div class="card-body">
+                            {% if messages %}
+                                <div class="alert alert-info">
+                                    {% for message in messages %}
+                                        <p>{{ message }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <form method="post" action="{% url 'new_asset' %}">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label for="id_name">Nome:</label>
+                                        <input type="text" name="name" id="id_name" class="form-control" maxlength="50" required>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label for="id_category">Categoria:</label>
+                                        <select name="category" id="id_category" class="form-control" required>
+                                            {% for category in categories %}
+                                            <option value="{{ category.id }}">{{ category.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_subcategory">SubCategoria:</label>
+                                        <select name="subcategory" id="id_subcategory" class="form-control">
+
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_sector">Setor:</label>
+                                        <select name="sector" id="id_sector" class="form-control" required>
+                                            {% for sector in sectors %}
+                                            <option value="{{ sector.id }}">{{ sector.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_subsector">SubSetor:</label>
+                                        <select name="subsector" id="id_subsector" class="form-control">
+
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label for="id_rental_company">Empresa:</label>
+                                        <select name="rental_company" id="id_rental_company" class="form-control" required>
+                                            {% for rental_company in rental_companies %}
+                                            <option value="{{ rental_company.id }}">{{ rental_company.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_internal_code1">{% if global_settings.internalcode1 %}{{ global_settings.internal_code1 }}{% else %} Codigo Interno 1 {% endif %}:</label>
+                                        <input type="text" name="internal_code1" id="id_internal_code1" class="form-control" maxlength="50">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_internal_code2">{% if global_settings.internalcode2 %}{{ global_settings.internal_code2 }}{% else %} Codigo Interno 2 {% endif %}:</label>
+                                        <input type="text" name="internal_code2" id="id_internal_code2" class="form-control" maxlength="50">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_internal_code3">{% if global_settings.internalcode3 %}{{ global_settings.internal_code3 }}{% else %} Codigo Interno 3 {% endif %}:</label>
+                                        <input type="text" name="internal_code3" id="id_internal_code3" class="form-control" maxlength="50">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label for="id_serial_number">Numero de Série:</label>
+                                        <input type="text" name="serial_number" id="id_serial_number" class="form-control" maxlength="50">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_brand">Marca:</label>
+                                        <input type="text" name="brand" id="id_brand" class="form-control" maxlength="50">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_mac_address">MAC Address:</label>
+                                        <input type="text" name="mac_address" id="id_mac_address" class="form-control" maxlength="50">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label for="id_windows_license">Licença Windows:</label>
+                                        <input type="text" name="windows_license" id="id_windows_license" class="form-control" maxlength="50">
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary mt-3">Concluir</button>
+                            </form>
+                            
+                            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                            <script>
+                                $(document).ready(function(){
+                                    $('#id_sector').change(function(){
+                                        var sector_id = $(this).val();
+                                        $.ajax({
+                                            url: '/get_subsectors/',
+                                            data: {'sector_id': sector_id},
+                                            dataType: 'json',
+                                            success: function(data){
+                                                $('#id_subsector').empty();
+                                                $.each(data.subsectors, function(index, subsector){
+                                                    $('#id_subsector').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                                                });
+                                            },
+                                            error: function(xhr, status, error) {
+                                                console.error("Error:", error);
+                                            }
+                                        });
+                                    });
+                                    $('#id_category').change(function(){
+                                        var category_id = $(this).val();
+                                        $.ajax({
+                                            url: '/get_subcategories/',
+                                            data: {'category_id': category_id},
+                                            dataType: 'json',
+                                            success: function(data){
+                                                $('#id_subcategory').empty();
+                                                $.each(data.subcategories, function(index, subcategory){
+                                                    $('#id_subcategory').append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>');
+                                                });
+                                            },
+                                            error: function(xhr, status, error) {
+                                                console.error("Error:", error);
+                                            }
+                                        });
+                                    });
+                                });
+                            </script>
+    
+                        </div>
+                    
+                </div>
+            </div>
+
+<!-- ===================================== SECTORS ============================= -->
+
+            <div id="collSector" class="accordion-collapse collapse" aria-labelledby="headSector" data-bs-parent="#accBtns">
+                <div class="card">
+
+                        <div class="card-header">
+                            Setores e Subsetores
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-4">
+                                    <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy text-center">
+                                        <ul class="list-group">
+                                            {% for sector in sector_list %}
+                                            <li class="list-group-item">{{ sector.name }}</li>
+                                            {% endfor %}
+                                        </ul>  
+                                    </div>
+                                </div>
+                                <div class="col-8">
+                                    <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                                    <h4 id="simple-list-item-1">Item 1</h4>
+                                    <p>...</p>
+                                    <h4 id="simple-list-item-2">Item 2</h4>
+                                    <p>...</p>
+                                    <h4 id="simple-list-item-3">Item 3</h4>
+                                    <p>...</p>
+                                    <h4 id="simple-list-item-4">Item 4</h4>
+                                    <p>...</p>
+                                    <h4 id="simple-list-item-5">Item 5</h4>
+                                    <p>...</p>
+                                    </div>
+                                </div>
+                                </div>
+                        </div>
+                    
+                </div>
+            </div>
+
+<!-- ===================================== KITS ============================= -->
+
+            <div id="collKit" class="accordion-collapse collapse" aria-labelledby="headKit" data-bs-parent="#accBtns">
+                <div class="card">
+                    <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.</code>, though the transition does limit overflow.
+                </div>
+            </div>
+
+<!-- ===================================== NEW ASSET ============================= -->
+
+
+
+    
+
+            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accBtns">
+                <div class="card">
+                    <div class="card-body">
+                        <button id="scanQrCodeBtn" class="btn btn-primary">Scan QR Code</button>
+                        <video id="video" width="300" height="200" style="display:none;"></video>
+                        <canvas id="canvas" style="display:none;"></canvas>
+                        <div id="qrResult"></div>
+                    </div>
+                 
+
+
+                    <script>
+                        document.getElementById('scanQrCodeBtn').addEventListener('click', function() {
+                            const video = document.getElementById('video');
+                            const canvasElement = document.getElementById('canvas');
+                            const canvas = canvasElement.getContext('2d');
+                            const qrResult = document.getElementById('qrResult');
+                
+                            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(stream) {
+                                video.srcObject = stream;
+                                video.setAttribute('playsinline', true); // required to tell iOS safari we don't want fullscreen
+                                video.style.display = 'block';
+                                video.play();
+                                requestAnimationFrame(tick);
+                            }).catch(function(err) {
+                                console.error("Error accessing camera: ", err);
+                                qrResult.textContent = "Error accessing camera: " + err;
+                            });
+                
+                            function tick() {
+                                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                                    canvasElement.height = video.videoHeight;
+                                    canvasElement.width = video.videoWidth;
+                                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                                    const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                                        inversionAttempts: 'dontInvert',
+                                    });
+                                    if (code) {
+                                        drawLine(code.location.topLeftCorner, code.location.topRightCorner, '#FF3B58');
+                                        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, '#FF3B58');
+                                        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, '#FF3B58');
+                                        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, '#FF3B58');
+                                        qrResult.textContent = "QR Code Data: " + code.data;
+                                        console.log("QR Code Data: ", code.data);
+                                        stopVideo();
+                                    } else {
+                                        qrResult.textContent = "No QR code detected.";
+                                        requestAnimationFrame(tick);
+                                    }
+                                } else {
+                                    requestAnimationFrame(tick);
+                                }
+                            }
+                
+                            function drawLine(begin, end, color) {
+                                canvas.beginPath();
+                                canvas.moveTo(begin.x, begin.y);
+                                canvas.lineTo(end.x, end.y);
+                                canvas.lineWidth = 4;
+                                canvas.strokeStyle = color;
+                                canvas.stroke();
+                            }
+                
+                            function stopVideo() {
+                                video.srcObject.getTracks().forEach(track => track.stop());
+                                video.style.display = 'none';
+                            }
+                        });
+                    </script>
+
+
+
+
+
+                    
+                </div>
+            </div>
+
+  
+
+        </div>
+    </div>
+
+<!--==========================================
+=                                            =
+=                                            =
+=              LISTA DE ATIVOS               =
+=                                            =
+=                                            =
+===========================================-->
+
+    <div class="card mt-3">
+        <div class="card-header">
+            Lista de Ativos
+        </div>
+        <div class="card-body">
+
+            <table class="table table-sm">
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">{{global_settings.internalcode01}}</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Setor</th>
+                    <th scope="col">Sub-Setor</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">SubCategoria</th>
+                    <th scope="col">Ações</th>
+                </tr>
+                {% for asset in page_obj %}
+                <tr>
+                    <td>{{ asset.id }}</td>
+                    <td>{{ asset.internal_code1 }}</td>
+                    <td>{{ asset.name }}</td>
+                    <td>{% if asset.sector %}{{ asset.sector }}{% endif %}</td>
+                    <td>{% if asset.subsector %}{{ asset.subsector }}{% endif %}</td>
+                    <td>{% if asset.category %}{{ asset.category }}{% endif %}</td>
+                    <td>{% if asset.subcategory %}{{ asset.subcategory }}{% endif %}</td>
+                    <td>
+                        <a href="{% url 'history_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-history"></i></a>
+                        <a href="{% url 'edit_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
+                        <button class="btn btn-secondary btn-sm" id="generateQR{{asset.id}}" data-bs-toggle="modal" data-bs-target="#qrModal{{ asset.id }}"><i class="nf nf-md-qrcode"></i></button>
+                        <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferModal{{ asset.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ asset.id }}"><i class="nf nf-md-delete"></i></button>
+                    </td>
+                </tr>
+
+                <!-- Transfer Modal ============================================================================================================================-->
+
+                <div class="modal fade" id="transferModal{{ asset.id }}" tabindex="-1" aria-labelledby="transferModalLabel{{ asset.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="transferModalLabel{{ asset.id }}">Transfer {{ asset.name }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'transfer_asset' asset.id %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="id_sector">Setor:</label>
+                                                <select name="sector" id="id_sector_t_{{asset.id}}" class="form-control" required>
+                                                    {% for sector in sectors %}
+                                                    <option value="{{ sector.id }}">{{ sector.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                {% if asset.sector %}<p>Atual: {{ asset.sector }}</p>{% endif %}
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="id_subsector">SubSetor:</label>
+                                                <select name="subsector" id="id_subsector_t_{{asset.id}}" class="form-control">
+                                                    
+                                                </select>
+                                                {% if asset.subsector %}<p>Atual: {{ asset.subsector }}</p>{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>             
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                                        <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                                    </div>
+                                </form>           
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+               <!-- QR Modal ===========================================================================================================================-->
+
+                <div class="modal fade" id="qrModal{{ asset.id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ asset.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="qrModalLabel{{ asset.id }}">QR-Code {{ asset.name }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="qrtag{{ asset.id }}">
+                                    <div  class="row">
+                                        <div class="col-12 text-center">
+                                        </div>
+                                        <div class="col-auto text-center">
+                                            
+                                            <div id="qrCodeContainer{{asset.id}}"></div>
+                                        </div>
+                                        <div class="col">
+                                            <img src="{% static 'img/hegvses.png' %}" class="logo_print">
+                                            <p><b>GESTÃO DE ATIVOS DE TI</b>
+                                            <br><b style="font-size: 26px;">{{ asset.internal_code1}}</b>
+                                            <br>EMPRESA: {{ asset.rental_company}}
+                                            <br>Ramal: 374</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                                <script>
+                                    $(document).ready(function() {
+                                        $('#generateQR{{asset.id}}').click(function() {
+                                            $.ajax({
+                                                type: 'GET',
+                                                url: '{% url "generate_qr_code" asset.id %}',
+                                                xhrFields: {
+                                                    responseType: 'blob'
+                                                },
+                                                success: function(data) {
+                                                    var reader = new FileReader();
+                                                    reader.onload = function(e) {
+                                                        $('#qrCodeContainer{{asset.id}}').html('<img src="' + e.target.result + '" alt="QR Code" class="qrcode">');
+                                                    }
+                                                    reader.readAsDataURL(data);
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    console.error("Error:", error);
+                                                }
+                                            });
+                                        });
+                                    });
+
+                                    function printDiv(divId) {
+                                        var content = document.getElementById(divId).innerHTML;
+                                        var originalContent = document.body.innerHTML;
+
+                                        document.body.innerHTML = content;
+
+                                        window.print();
+
+                                        document.body.innerHTML = originalContent;
+                                    }
+                                </script>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" onclick="printDiv('qrtag{{ asset.id }}')">Print</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>          
+                <script>
+                    $(document).ready(function(){
+                        console.log("Document ready");
+                        $('#id_sector_t_{{asset.id}}').change(function(){
+                            console.log("Setor change event");
+                            var sector_id = $(this).val();
+                            $.ajax({
+                                url: '/get_subsectors/',
+                                data: {'sector_id': sector_id},
+                                dataType: 'json',
+                                success: function(data){
+                                    console.log("Subsectors received:", data.subsectors);
+                                    $('#id_subsector_t_{{asset.id}}').empty();
+                                    $.each(data.subsectors, function(index, subsector){
+                                        $('#id_subsector_t_{{asset.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                                    });
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error:", error);
+                                }
+                            });
+                        });
+                    });
+                </script>
+
+                <!-- Delete Modal =================================================================================================================-->
+
+                <div class="modal fade" id="deleteModal{{ asset.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ asset.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ asset.id }}">Deseja remover {{ asset.name }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'delete_asset' asset.id %}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                {% endfor%}
+            </table>
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&laquo;</span>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                    {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">&raquo;</span>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+{% endblock %}

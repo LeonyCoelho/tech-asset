@@ -9,6 +9,9 @@ class CustomUser(models.Model):
         return self.name
 class GlobalSettings(models.Model):
     name = models.CharField(null=True, max_length=50)
+    internalcode01 = models.CharField(max_length=50, null=True)
+    internalcode02 = models.CharField(max_length=50, null=True)
+    internalcode03 = models.CharField(max_length=50, null=True)
 
 # ================== APP MAIN DATABASE ===============
 class Category(models.Model):
@@ -36,12 +39,12 @@ class RentalCompany(models.Model):
 class Asset(models.Model):
     name = models.CharField(null=False, max_length=50)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null= True)
     modified = models.DateTimeField(auto_now_add=True)
     added = models.DateTimeField(auto_now_add=True)
     details = models.TextField(null=True)
     sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
-    subsector = models.ForeignKey(SubSector, blank=True, on_delete=models.CASCADE)
+    subsector = models.ForeignKey(SubSector, blank=True, on_delete=models.CASCADE, null= True)
     rental_company = models.ForeignKey(RentalCompany, on_delete=models.CASCADE)
     internal_code1 = models.CharField(null=True, max_length=50)
     internal_code2 = models.CharField(null=True, max_length=50)

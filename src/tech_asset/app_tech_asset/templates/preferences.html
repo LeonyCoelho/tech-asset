@@ -1,57 +1,129 @@
-<h1>Preferences</h1>
-<h3>Categorias</h3>
-<form method="post" action="{% url 'new_category' %}">
-    {% csrf_token %}
-    {{ categoryform.as_p }}
-    <button type="submit">Submit</button>
-</form>
-<ul>
-    {% for category in category_list %}
-    <li>{{ category.name }}</li>
-    {% endfor %}
-</ul>
-<h3>SubCategorias</h3>
-<form method="post" action="{% url 'new_subcategory' %}">
-    {% csrf_token %}
-    {{ subcategoryform.as_p }}
-    <button type="submit">Submit</button>
-</form>
-<ul>
-    {% for subcategory in subcategory_list %}
-    <li>{{ subcategory.parent}} - {{ subcategory.name }}</li>
-    {% endfor %}
-</ul>
-<h3>Setor</h3>
-<form method="post" action="{% url 'new_sector' %}">
-    {% csrf_token %}
-    {{ sectorform.as_p }}
-    <button type="submit">Submit</button>
-</form>
-<ul>
-    {% for sector in sector_list %}
-    <li>{{ sector.name }}</li>
-    {% endfor %}
-</ul>
-<h3>Sub-Setor</h3>
-<form method="post" action="{% url 'new_subsector' %}">
-    {% csrf_token %}
-    {{ subsectorform.as_p }}
-    <button type="submit">Submit</button>
-</form>
-<ul>
-    {% for subsector in subsector_list %}
-    <li>{{subsector.parent}} - {{ subsector.name }}</li>
-    {% endfor %}
-</ul>
-<h3>Empresa</h3>
-<form method="post" action="{% url 'new_rentalcompany' %}">
-    {% csrf_token %}
-    {{ rentalcompanyform.as_p }}
-    <button type="submit">Submit</button>
-</form>
+{% extends 'base.html' %}
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
 
-<ul>
-    {% for rentalcompany in rentalcompany_list %}
-    <li>{{ rentalcompany.name }}</li>
-    {% endfor %}
-</ul>
+<div class="container">
+    <h1>Preferences</h1>
+    <div class="row"  data-masonry='{"percentPosition": true }'>
+        <div class="col-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Geral
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'global_settings' %}">
+                        {% csrf_token %}
+                        {{ globalform.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Categorias
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'new_category' %}">
+                        {% csrf_token %}
+                        {{ categoryform.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for category in categories %}
+                        <li class="list-group-item">{{ category.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    SubCategorias
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'new_subcategory' %}">
+                        {% csrf_token %}
+                        {{ subcategoryform.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for subcategory in subcategories %}
+                        <li class="list-group-item">{{ subcategory.parent}} - {{ subcategory.name }}</li>
+                        {% endfor %}
+                    </ul>                    
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Setor
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'new_sector' %}">
+                        {% csrf_token %}
+                        {{ sectorform.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for sector in sectors %}
+                        <li class="list-group-item">{{ sector.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Sub-Setor
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'new_subsector' %}">
+                        {% csrf_token %}
+                        {{ subsectorform.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for subsector in subsectors %}
+                        <li class="list-group-item">{{subsector.parent}} - {{ subsector.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="card mb-3">
+                <div class="card-header">
+                    Empresa
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'new_rentalcompany' %}">
+                        {% csrf_token %}
+                        {{ rentalcompanyform.as_p }}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group">
+                        {% for rentalcompany in rental_companies %}
+                        <li class="list-group-item">{{ rentalcompany.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
