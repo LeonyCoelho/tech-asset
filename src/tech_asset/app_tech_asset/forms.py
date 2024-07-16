@@ -1,11 +1,23 @@
 from django import forms
-from .models import Category, SubCategory, Sector, SubSector, RentalCompany, Asset
+from .models import Category, SubCategory, Sector, SubSector, RentalCompany, Asset, Kit, GlobalSettings
 
 class GlobalForm(forms.Form):
-    name = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class':'form-control'}))
+    name = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class':'form-control', 'placeholder' : 'name'}))
     internalcode01 = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class':'form-control'}))
     internalcode02 = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class':'form-control'}))
     internalcode03 = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class':'form-control'}))
+
+    def __init__(self, *args, **kwargs):
+        super(GlobalForm, self).__init__(*args, **kwargs)
+        try:
+            global_settings = GlobalSettings.objects.first()
+            if global_settings:
+                self.fields['name'].initial = global_settings.name
+                self.fields['internalcode01'].initial = global_settings.internalcode01
+                self.fields['internalcode02'].initial = global_settings.internalcode02
+                self.fields['internalcode03'].initial = global_settings.internalcode03
+        except GlobalSettings.DoesNotExist:
+            pass
 
 class CategoryForm(forms.Form):
     Nova_Categoria = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -14,11 +26,34 @@ class SubCategoryForm(forms.Form):
     Nova_SubCategoria = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 class SectorForm(forms.Form):
-    Novo_Setor = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    Novo_Setor = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Novo Setor'}))
 
 class SubSectorForm(forms.Form):
-    Novo_SubSetor = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    parent = forms.ModelChoiceField(
+        queryset=Sector.objects.all(), 
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Selecione o Setor"
+    )
+    Novo_SubSetor = forms.CharField(
+        max_length=50, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Novo Subsetor'})
+    )
 
+class KitForm(forms.ModelForm):
+    assets = forms.ModelMultipleChoiceField(
+        queryset=Asset.objects.all(),
+        widget=forms.CheckboxSelectMultiple(attrs={'class': 'form-check-input'}),
+        required=False
+    )
+
+    class Meta:
+        model = Kit
+        fields = ['name', 'sectors', 'subsectors', 'assets']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder': 'Nome do Kit'}),
+            'sectors': forms.Select(attrs={'class': 'form-control mb-3'}),
+            'subsectors': forms.Select(attrs={'class': 'form-control mb-3'}),
+        }
 class RentalCompanyForm(forms.Form):
     Nova_Empresa = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
@@ -27,7 +62,16 @@ class AssetForm(forms.Form):
     category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(attrs={'class': 'form-select'}))
     subcategory = forms.ModelChoiceField(queryset=SubCategory.objects.all(), required=False,  widget=forms.Select(attrs={'class': 'form-select'}))
     sector = forms.ModelChoiceField(queryset=Sector.objects.all(), widget=forms.Select(attrs={'class': 'form-select'}))
-    subsector = forms.ModelChoiceField(queryset=SubSector.objects.all(), required=False,  widget=forms.Select(attrs={'class': 'form-select'}))
+    subsector = forms.ModelChoiceField(queryset=SubSector.objects.all(), required=False, widget=forms.Select(attrs={'class': 'form-select'}))
+    sector = forms.ModelChoiceField(
+        queryset=Sector.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Setor'})
+    )
+    subsector = forms.ModelChoiceField(
+        queryset=SubSector.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Subsetor'})
+    )
     rental_company = forms.ModelChoiceField(queryset=RentalCompany.objects.all(), widget=forms.Select(attrs={'class': 'form-select'}))
     internal_code1 = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     internal_code2 = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))

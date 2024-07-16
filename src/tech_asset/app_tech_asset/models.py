@@ -36,16 +36,23 @@ class RentalCompany(models.Model):
     name = models.CharField(null=False, max_length=50)
     def __str__(self):
         return self.name
+class Kit(models.Model):
+    name = models.CharField(null=False, default='Kit', max_length=50)
+    modified = models.DateTimeField(auto_now_add=True, null=True)
+    sectors = models.ForeignKey(Sector, on_delete=models.SET_NULL, null= True)
+    subsectors = models.ForeignKey(SubSector, on_delete=models.SET_NULL, null= True)
+    def __str__(self):
+        return self.name
 class Asset(models.Model):
     name = models.CharField(null=False, max_length=50)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, null= True)
+    category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.SET_NULL, null= True)
     modified = models.DateTimeField(auto_now_add=True)
     added = models.DateTimeField(auto_now_add=True)
     details = models.TextField(null=True)
-    sector = models.ForeignKey(Sector, on_delete=models.CASCADE)
-    subsector = models.ForeignKey(SubSector, blank=True, on_delete=models.CASCADE, null= True)
-    rental_company = models.ForeignKey(RentalCompany, on_delete=models.CASCADE)
+    sector = models.ForeignKey(Sector, null=True, on_delete=models.SET_NULL)
+    subsector = models.ForeignKey(SubSector, blank=True, on_delete=models.SET_NULL, null= True)
+    rental_company = models.ForeignKey(RentalCompany, null=True, on_delete=models.SET_NULL)
     internal_code1 = models.CharField(null=True, max_length=50)
     internal_code2 = models.CharField(null=True, max_length=50)
     internal_code3 = models.CharField(null=True, max_length=50)
@@ -53,11 +60,25 @@ class Asset(models.Model):
     brand = models.CharField(null=True, max_length=50)
     mac_address = models.CharField(null=True, max_length=50)
     windows_license = models.CharField(null=True, max_length=50)
+    kit = models.ForeignKey(Kit, on_delete=models.SET_NULL, null=True, blank=True)  # Novo campo para Kit
+
     def __str__(self):
         return self.name
-class Kit(models.Model):
-    assets = models.ManyToManyField(Asset)
-    sectors = models.ManyToManyField(Sector)
+class KitHistory(models.Model):
+    kit_id = models.ForeignKey(Kit, on_delete=models.CASCADE)
+    name = models.CharField(null=False, default='Kit', max_length=50)
+    modification_type = models.CharField(null=False, max_length=50)
+    modified = models.DateTimeField(auto_now_add=True)
+    user = models.CharField(null=False, max_length=50)
+    
+    sector = models.CharField(null=False, max_length=50)
+    previous_sector = models.CharField(null=True, max_length=50)
+    new_sector =  models.CharField(null=True, max_length=50)
+    
+    subsector = models.CharField(null=False, max_length=50)
+    previous_subsector = models.CharField(null=True, max_length=50)
+    new_subsector =  models.CharField(null=True, max_length=50)
+
     def __str__(self):
         return self.name
 class AssetQR(models.Model):
@@ -73,7 +94,15 @@ class AssetHistory(models.Model):
     modified = models.DateTimeField(auto_now_add=True)
     user = models.CharField(null=False, max_length=50)
     details = models.TextField(null=True)
+
     sector = models.CharField(null=False, max_length=50)
+    new_sector =  models.CharField(null=True, max_length=50)
+    previous_sector =  models.CharField(null=True, max_length=50)
+    
+    subsector = models.CharField(null=True, max_length=50)
+    new_subsector =  models.CharField(null=True, max_length=50)
+    previous_subsector =  models.CharField(null=True, max_length=50)
+
     rental_company = models.CharField(null=False, max_length=50)
     internal_code1 = models.CharField(null=True, max_length=50)
     internal_code2 = models.CharField(null=True, max_length=50)

@@ -1,79 +1,10 @@
+{% extends 'base.html' %}
+{% block content %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner</title>
-    <!-- Caminho para o script jsQR hospedado localmente -->
-    <script src="{% static 'js/jsQR.js' %}"></script>
-    <script>
-        console.log("jsQR script loaded: ", typeof jsQR !== 'undefined');
-    </script>
-</head>
-<body>
-    <button id="scanQrCodeBtn">Scan QR Code</button>
-    <video id="video" width="300" height="200" style="display:none;"></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-    <div id="qrResult"></div>
-    <script>
-        document.getElementById('scanQrCodeBtn').addEventListener('click', function() {
-            const video = document.getElementById('video');
-            const canvasElement = document.getElementById('canvas');
-            const canvas = canvasElement.getContext('2d');
-            const qrResult = document.getElementById('qrResult');
 
-            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(stream) {
-                video.srcObject = stream;
-                video.setAttribute('playsinline', true); // required to tell iOS safari we don't want fullscreen
-                video.style.display = 'block';
-                video.play();
-                requestAnimationFrame(tick);
-            }).catch(function(err) {
-                console.error("Error accessing camera: ", err);
-                qrResult.textContent = "Error accessing camera: " + err;
-            });
 
-            function tick() {
-                if (video.readyState === video.HAVE_ENOUGH_DATA) {
-                    canvasElement.height = video.videoHeight;
-                    canvasElement.width = video.videoWidth;
-                    canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
-                    const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
-                    const code = jsQR(imageData.data, imageData.width, imageData.height, {
-                        inversionAttempts: 'dontInvert',
-                    });
-                    if (code) {
-                        drawLine(code.location.topLeftCorner, code.location.topRightCorner, '#FF3B58');
-                        drawLine(code.location.topRightCorner, code.location.bottomRightCorner, '#FF3B58');
-                        drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, '#FF3B58');
-                        drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, '#FF3B58');
-                        qrResult.textContent = "QR Code Data: " + code.data;
-                        console.log("QR Code Data: ", code.data);
-                        stopVideo();
-                    } else {
-                        qrResult.textContent = "No QR code detected.";
-                        requestAnimationFrame(tick);
-                    }
-                } else {
-                    requestAnimationFrame(tick);
-                }
-            }
 
-            function drawLine(begin, end, color) {
-                canvas.beginPath();
-                canvas.moveTo(begin.x, begin.y);
-                canvas.lineTo(end.x, end.y);
-                canvas.lineWidth = 4;
-                canvas.strokeStyle = color;
-                canvas.stroke();
-            }
 
-            function stopVideo() {
-                video.srcObject.getTracks().forEach(track => track.stop());
-                video.style.display = 'none';
-            }
-        });
-    </script>
-</body>
-</html>
+
+
+{% endblock %}

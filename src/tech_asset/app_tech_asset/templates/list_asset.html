@@ -7,9 +7,12 @@
 </script>
 
 
-<div class="container mt-5">
+<div class="container mt-3">
     <div class="accordion" id="accBtns">
         <div class="">
+            
+<!-- ===================================== TOP BUTTONS ============================= -->
+
             <div class="row">
                 <div class="col-3">
                     <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collNewAsset" aria-expanded="false" aria-controls="collNewAsset">
@@ -24,46 +27,35 @@
                     <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collSector" aria-expanded="false" aria-controls="collSector">
                         <div class="card-body">
                             <h4 id="headSector">
-                                Setores
+                                Setores e Kits
                             </h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-3">
-                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collKit" aria-expanded="false" aria-controls="collKit">
+                    <div class="card mb-3" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
                         <div class="card-body">
                             <h4 id="headKit">
-                                Kits
+                                Busca Avançada
                             </h4>
                         </div>
                     </div>
                 </div>
                 <div class="col-3">
-                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                    <div class="card mb-3" id="scanQrCodeBtn" type="button" data-bs-toggle="modal" data-bs-target="#qrCodeScanModal">
                         <div class="card-body">
                             <h4 id="headingThree">
-                                Accordion Item #3
+                                Escanear QR Code
                             </h4>
                         </div>
                     </div>
                 </div>                
-
-                <div class="col-3">
-                    <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
-                        <div class="card-body">
-                            <h4 id="headingThree">
-                                Accordion Item #3
-                            </h4>
-                        </div>
-                    </div>
-                </div>
-
+                
             </div>
-
 
 <!-- ===================================== NEW ASSET ============================= -->
 
-            <div id="collNewAsset" class="accordion-collapse collapse" aria-labelledby="headNewAsset" data-bs-parent="#accBtns">
+            <div id="collNewAsset" class="accordion-collapse collapse mb-3" aria-labelledby="headNewAsset" data-bs-parent="#accBtns">
                 <div class="card">
                         <div class="card-header">
                             Novo Ativo
@@ -202,88 +194,455 @@
                 </div>
             </div>
 
-<!-- ===================================== SECTORS ============================= -->
+<!-- ===================================== SECTORS AND KITS ============================= -->
 
-            <div id="collSector" class="accordion-collapse collapse" aria-labelledby="headSector" data-bs-parent="#accBtns">
-                <div class="card">
+            <div id="collSector" class="accordion-collapse collapse mb-3" aria-labelledby="headSector" data-bs-parent="#accBtns">
+                <div class="row">
+                    <div class="col-8">
+                        <div class="card">
+                            <div class="card-header">
+                                Setores e Subsetores
+                            </div>
+                            <div class="card-body">
 
-                        <div class="card-header">
-                            Setores e Subsetores
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-4">
-                                    <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy text-center">
-                                        <ul class="list-group">
-                                            {% for sector in sector_list %}
-                                            <li class="list-group-item">{{ sector.name }}</li>
-                                            {% endfor %}
-                                        </ul>  
+                                <div class="row">
+                                    <div class="col-4">
+                                        <form method="post" class="mb-3" action="{% url 'new_sector' %}">
+                                            {% csrf_token %}
+                                            <div class="input-group">
+                                                {{ sectorform.Novo_Setor }}
+                                                <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                                            </div>
+                                        </form>
+                                        <div class="sector-list">
+                                            <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
+                                                <ul class="list-group" id="sector-list">
+                                                    {% for sector in sector_list %}
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showSubsectors('{{ sector.id }}')">
+                                                        {{ sector.name }}
+                                                        <a href="#" class="btn btn-outline-danger btn-sm" onclick="deleteSector('{{ sector.id }}', event)"><i class="nf nf-md-delete"></i></a>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>  
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-8">
-                                    <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                                    <h4 id="simple-list-item-1">Item 1</h4>
-                                    <p>...</p>
-                                    <h4 id="simple-list-item-2">Item 2</h4>
-                                    <p>...</p>
-                                    <h4 id="simple-list-item-3">Item 3</h4>
-                                    <p>...</p>
-                                    <h4 id="simple-list-item-4">Item 4</h4>
-                                    <p>...</p>
-                                    <h4 id="simple-list-item-5">Item 5</h4>
-                                    <p>...</p>
+                                    <div class="col-8">
+                                        <form method="post" class="mb-3" action="{% url 'new_subsector' %}">
+                                            {% csrf_token %}                                    
+                                            <div class="input-group mb-3">
+                                                {{ subsectorform.parent }}
+                                                {{ subsectorform.Novo_SubSetor }}
+                                                <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                                            </div>
+                                        </form>
+                                        <div class="sector-list">
+                                            <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                                                <ul class="list-group" id="subsector-list">
+                                                    <!-- Subsetores serão inseridos aqui -->
+                                                </ul>  
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                </div>
+                                    </div>
+
+
+
+                            </div>
                         </div>
-                    
-                </div>
-            </div>
+                        <script>
+                            // Adiciona uma mensagem de depuração para verificar se o script está sendo carregado
+                            console.log("Script carregado");
 
-<!-- ===================================== KITS ============================= -->
+                            // Criar um objeto vazio para armazenar setores
+                            const sectors = {};
 
-            <div id="collKit" class="accordion-collapse collapse" aria-labelledby="headKit" data-bs-parent="#accBtns">
-                <div class="card">
-                    <strong>This is the second item's accordion body.</strong> It is hidden by default, until the collapse plugin adds the appropriate classes that we use to style each element. These classes control the overall appearance, as well as the showing and hiding via CSS transitions. You can modify any of this with custom CSS or overriding our default variables. It's also worth noting that just about any HTML can go within the <code>.</code>, though the transition does limit overflow.
-                </div>
-            </div>
+                            // Adiciona setores ao objeto com base nos dados do template
+                            {% for sector in sector_list %}
+                            sectors['{{ sector.id }}'] = [
+                                {% for subsector in sector.subsector_set.all %}
+                                {id: '{{ subsector.id }}', name: '{{ subsector.name }}'},
+                                {% endfor %}
+                            ];
+                            {% endfor %}
 
-<!-- ===================================== NEW ASSET ============================= -->
+                            // Adiciona uma mensagem de depuração para verificar se os setores foram carregados corretamente
+                            console.log("Setores carregados:", sectors);
 
+                            function showSubsectors(sectorId) {
+                                // Adiciona uma mensagem de depuração para verificar se a função está sendo chamada
+                                console.log("showSubsectors chamado para o setor:", sectorId);
 
+                                const subsectorList = document.getElementById('subsector-list');
+                                subsectorList.innerHTML = ''; // Limpar lista de subsetores
 
-    
+                                if (sectors[sectorId]) {
+                                    sectors[sectorId].forEach(subsector => {
+                                        const li = document.createElement('li');
+                                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                        li.textContent = subsector.name;
 
-            <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accBtns">
-                <div class="card">
-                    <div class="card-body">
-                        <button id="scanQrCodeBtn" class="btn btn-primary">Scan QR Code</button>
-                        <video id="video" width="300" height="200" style="display:none;"></video>
-                        <canvas id="canvas" style="display:none;"></canvas>
-                        <div id="qrResult"></div>
+                                        // Cria o botão de exclusão
+                                        const deleteButton = document.createElement('a');
+                                        deleteButton.className = 'btn btn-outline-danger btn-sm';
+                                        deleteButton.innerHTML = '<i class="nf nf-md-delete"></i>';
+                                        deleteButton.href = '#';
+                                        deleteButton.onclick = function(event) {
+                                            event.preventDefault();
+                                            deleteSubsector(subsector.id);
+                                        };
+
+                                        // Adiciona o botão de exclusão ao item da lista
+                                        li.appendChild(deleteButton);
+                                        subsectorList.appendChild(li);
+                                    });
+                                } else {
+                                    console.log("Nenhum subsetor encontrado para o setor:", sectorId);
+                                }
+                            }
+
+                            function deleteSubsector(subsectorId) {
+                                console.log("Deletar subsector com ID:", subsectorId);
+
+                                // Envia uma solicitação de exclusão para o servidor (exemplo de como isso pode ser feito com AJAX)
+                                fetch(`/delete_subsector/${subsectorId}/`, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        console.log("Subsector deletado com sucesso:", subsectorId);
+                                        // Remover o subsetor do DOM
+                                        document.querySelector(`#subsector-list li[data-id='${subsectorId}']`).remove();
+                                    } else {
+                                        console.log("Erro ao deletar o subsector:", subsectorId);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Erro ao enviar a solicitação de exclusão:", error);
+                                });
+                            }
+
+                            function deleteSector(sectorId, event) {
+                                event.preventDefault(); // Previne o comportamento padrão do link
+                                event.stopPropagation(); // Impedir que o clique no botão de exclusão acione a função showSubsectors
+                                console.log("Deletar setor com ID:", sectorId);
+
+                                // Envia uma solicitação de exclusão para o servidor (exemplo de como isso pode ser feito com AJAX)
+                                fetch(`/preferences/sector/delete/${sectorId}/`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
+                                    }
+                                })
+                                .then(response => {
+                                    if (response.ok) {
+                                        console.log("Setor deletado com sucesso:", sectorId);
+                                        // Remover o setor do DOM
+                                        document.querySelector(`#sector-list li[onclick='showSubsectors("${sectorId}")']`).remove();
+                                    } else {
+                                        console.log("Erro ao deletar o setor:", sectorId);
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error("Erro ao enviar a solicitação de exclusão:", error);
+                                });
+                            }
+                        </script>
                     </div>
-                 
+                    <div class="col-4">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                Kits
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-auto ms-3" data-bs-toggle="modal" data-bs-target="#newkitModal">
+                                    Novo Kit
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div class="kit-list">
+                                    <div class="accordion" id="accordionKit">
+                                        {% for kit in kit_list %}
+                                            <div class="accordion-item">
+                                                <h2 class="accordion-header">
+                                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ kit.id }}" aria-expanded="false" aria-controls="collapse{{ kit.id }}">
+                                                        {{ kit.id }} - {{ kit.name }} - {{ kit.sectors }} | {{ kit.subsectors }}
+                                                    </button>
+                                                </h2>
+                                                <div id="collapse{{ kit.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionKit">
+                                                    <div class="accordion-body">
+                                                        <ul class="list-group">
+                                                            <li class="list-group-item">
+                                                                <a href="" class="btn btn-sm btn-secondary"><i class="nf nf-md-history"></i></a>
+                                                                <a href="" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
+                                                                <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferKitModal{{ kit.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
+                                                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteKitModal{{ kit.id }}"><i class="nf nf-md-delete"></i></button>
+                                                            </li>
+                                                            {% for asset in kit.assets.all %}
+                                                            <li class="list-group-item">{{asset.id}} - {{ asset.name }} - {{asset.internal_code1}}</li>
+                                                            {% endfor %}
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Transfer Kit Modal ============================================================================================================================-->
+
+                                            <div class="modal fade" id="transferKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="transferKitModalLabel{{ kit.id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="transferKitModalLabel{{ kit.id }}">Transfer {{ kit.name }}</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post" action="{% url 'transfer_kit' kit.id %}">
+                                                                {% csrf_token %}
+                                                                <div class="modal-body">
+                                                                    <div class="row">
+                                                                        <div class="col-6">
+                                                                            <label for="id_sector_t_{{kit.id}}">Setor:</label>
+                                                                            <select name="sector" id="id_sector_t_{{kit.id}}" class="form-control" required>
+                                                                                {% for sector in sectors %}
+                                                                                <option value="{{ sector.id }}">{{ sector.name }}</option>
+                                                                                {% endfor %}
+                                                                            </select>
+                                                                            {% if kit.sector %}<p>Atual: {{ kit.sector }}</p>{% endif %}
+                                                                        </div>
+                                                                        <div class="col-6">
+                                                                            <label for="id_subsector_t_{{kit.id}}">SubSetor:</label>
+                                                                            <select name="subsector" id="id_subsector_t_{{kit.id}}" class="form-control">
+                                                                                {% for subsector in subsectors %}
+                                                                                <option value="{{ subsector.id }}">{{ subsector.name }}</option>
+                                                                                {% endfor %}
+                                                                            </select>
+                                                                            {% if kit.subsector %}<p>Atual: {{ kit.subsector }}</p>{% endif %}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>             
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                                                                    <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                                                                </div>
+                                                            </form>           
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delete Modal =================================================================================================================-->
+
+                                            <div class="modal fade" id="deleteKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="deleteKitModalLabel{{ kit.id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="deleteKitModalLabel{{ kit.id }}">Deseja remover {{ kit.name }}</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post" action="{% url 'delete_kit' kit.id %}">
+                                                                {% csrf_token %}
+                                                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            
 
 
+
+                                        {% endfor %} 
+                                    </div>
+                                </div>  
+                                <!-- Modal -->
+                                <div class="modal fade" id="newkitModal" tabindex="-1" aria-labelledby="newkitModalLabel" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="newkitModalLabel">New Kit</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form method="post" action="{% url 'new_kit' %}">
+                                                {% csrf_token %}
+                                                {{ kitform.name }}
+                                                <input type="text" id="asset-search" class="form-control mb-3" placeholder="Pesquisar ativos">
+                                                
+                                                <div id="asset-list" class="form-check">
+                                                    {% for asset in asset_list %}
+                                                        <div class="form-check">
+                                                            <input class="form-check-input asset-checkbox" type="checkbox" name="assets" value="{{ asset.id }}" id="asset{{ asset.id }}">
+                                                            <label class="form-check-label" for="asset{{ asset.id }}">
+                                                            {{asset.internal_code1}} - {{asset.name}}
+                                                            </label>
+                                                        </div>
+                                                    {% endfor %}
+                                                </div>
+                                    
+                                            </div>
+                                            <div class="modal-footer">
+                                            <button type="submit" class="btn btn-primary">Enviar</button>
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                            </form>
+                                            <script>
+                                                document.addEventListener("DOMContentLoaded", function() {
+                                                    const searchInput = document.getElementById("asset-search");
+                                                    const assetCheckboxes = document.querySelectorAll(".asset-checkbox");
+                                        
+                                                    searchInput.addEventListener("input", function() {
+                                                        const filter = searchInput.value.toLowerCase();
+                                                        assetCheckboxes.forEach(checkbox => {
+                                                            const label = checkbox.nextElementSibling.textContent.toLowerCase();
+                                                            if (label.includes(filter)) {
+                                                                checkbox.parentElement.style.display = "";
+                                                            } else {
+                                                                checkbox.parentElement.style.display = "none";
+                                                            }
+                                                        });
+                                                    });
+                                                });
+                                            </script>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>  
+                                
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+<!-- ===================================== FILTERS MODAL ============================= -->
+
+            <!-- Modal -->
+            <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="filterModalLabel">Filtrar Assets</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <form id="filterForm">
+                        <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Nome">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="sector" name="sector" placeholder="Setor">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="subsector" name="subsector" placeholder="Subsetor">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="category" name="category" placeholder="Categoria">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="subcategory" name="subcategory" placeholder="SubCategoria">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="rentalcompany" name="rentalcompany" placeholder="Empresa">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="internalcode1" name="internalcode1" placeholder="{{global_settings.internalcode01}}">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="internalcode2" name="internalcode2" placeholder="{{global_settings.internalcode02}}">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="internalcode3" name="internalcode3" placeholder="{{global_settings.internalcode03}}">
+                            </div>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="submitFilterForm()">Filtrar</button>
+                    </div>
+                </div>
+                </div>    
                     <script>
-                        document.getElementById('scanQrCodeBtn').addEventListener('click', function() {
+                        function submitFilterForm() {
+                            const form = document.getElementById('filterForm');
+                            const formData = new FormData(form);
+                            
+                            // Convert FormData to URL-encoded string
+                            const params = new URLSearchParams(formData);
+                            
+                            // Redirect to the filter view with the query parameters
+                            window.location.href = `/filter_assets?${params.toString()}`;
+                        }
+                    </script>
+                </div>
+<!-- ===================================== QRCODE SCAN ============================= -->
+     
+            <!-- Modal -->
+            <div class="modal fade" id="qrCodeScanModal" tabindex="-1" aria-labelledby="qrCodeScanModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="qrCodeScanModalLabel">Escanear QR-Code</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <style>
+                            .video-container {
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                flex-direction: column;
+                                height: 100%;
+                            }
+                            #video {
+                                display: none;
+                            }
+                            #canvas {
+                                display: none;
+                                width: 100%;
+                            }
+                        </style>
+                            <!-- <button id="scanQrCodeBtn" class="btn btn-primary mb-3">Iniciar</button> -->
+                            <div class="video-container">
+                                <video id="video" width="300" height="200"></video>
+                            </div>    
+                            <canvas id="canvas"></canvas>
+                            <div id="qrResult"></div>
+                        <script>
+                    document.addEventListener('DOMContentLoaded', (event) => {
+                        const qrCodeScanModal = document.getElementById('qrCodeScanModal');
+                        qrCodeScanModal.addEventListener('shown.bs.modal', function () {
+                            startQrCodeScanner();
+                        });
+
+                        function startQrCodeScanner() {
                             const video = document.getElementById('video');
                             const canvasElement = document.getElementById('canvas');
                             const canvas = canvasElement.getContext('2d');
                             const qrResult = document.getElementById('qrResult');
-                
-                            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function(stream) {
+
+                            navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function (stream) {
                                 video.srcObject = stream;
-                                video.setAttribute('playsinline', true); // required to tell iOS safari we don't want fullscreen
+                                video.setAttribute('playsinline', true); // iOS safari bullshit
                                 video.style.display = 'block';
                                 video.play();
                                 requestAnimationFrame(tick);
-                            }).catch(function(err) {
+                            }).catch(function (err) {
                                 console.error("Error accessing camera: ", err);
-                                qrResult.textContent = "Error accessing camera: " + err;
+                                qrResult.textContent = "ERRO AO ACESSAR A CAMERA: " + err;
                             });
-                
+
                             function tick() {
                                 if (video.readyState === video.HAVE_ENOUGH_DATA) {
                                     canvasElement.height = video.videoHeight;
@@ -300,16 +659,17 @@
                                         drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, '#FF3B58');
                                         qrResult.textContent = "QR Code Data: " + code.data;
                                         console.log("QR Code Data: ", code.data);
+                                        handleQrCodeData(code.data);
                                         stopVideo();
                                     } else {
-                                        qrResult.textContent = "No QR code detected.";
+                                        qrResult.textContent = "Não foi detectado nenhum QR Code.";
                                         requestAnimationFrame(tick);
                                     }
                                 } else {
                                     requestAnimationFrame(tick);
                                 }
                             }
-                
+
                             function drawLine(begin, end, color) {
                                 canvas.beginPath();
                                 canvas.moveTo(begin.x, begin.y);
@@ -318,23 +678,31 @@
                                 canvas.strokeStyle = color;
                                 canvas.stroke();
                             }
-                
+
                             function stopVideo() {
                                 video.srcObject.getTracks().forEach(track => track.stop());
                                 video.style.display = 'none';
                             }
-                        });
-                    </script>
 
-
-
-
-
-                    
+                            function handleQrCodeData(data) {
+                                const idMatch = data.match(/ID:\s*(\d+)/);
+                                if (idMatch && idMatch[1]) {
+                                    const assetId = idMatch[1];
+                                    window.location.href = `/asset/view/${assetId}/`;
+                                } else {
+                                    qrResult.textContent = "ID não encontrado no QR Code.";
+                                }
+                            }
+                        }
+                    });
+                        </script>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    </div>
+                </div>
                 </div>
             </div>
-
-  
 
         </div>
     </div>
@@ -347,7 +715,7 @@
 =                                            =
 ===========================================-->
 
-    <div class="card mt-3">
+    <div class="card mb-3">
         <div class="card-header">
             Lista de Ativos
         </div>
@@ -366,13 +734,13 @@
                 </tr>
                 {% for asset in page_obj %}
                 <tr>
-                    <td>{{ asset.id }}</td>
-                    <td>{{ asset.internal_code1 }}</td>
-                    <td>{{ asset.name }}</td>
-                    <td>{% if asset.sector %}{{ asset.sector }}{% endif %}</td>
-                    <td>{% if asset.subsector %}{{ asset.subsector }}{% endif %}</td>
-                    <td>{% if asset.category %}{{ asset.category }}{% endif %}</td>
-                    <td>{% if asset.subcategory %}{{ asset.subcategory }}{% endif %}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{{ asset.id }}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{{ asset.internal_code1 }}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{{ asset.name }}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.sector %}{{ asset.sector }}{% endif %}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.subsector %}{{ asset.subsector }}{% endif %}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.category %}{{ asset.category }}{% endif %}</td>
+                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.subcategory %}{{ asset.subcategory }}{% endif %}</td>
                     <td>
                         <a href="{% url 'history_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-history"></i></a>
                         <a href="{% url 'edit_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
@@ -424,7 +792,7 @@
                     </div>
                 </div>
 
-               <!-- QR Modal ===========================================================================================================================-->
+                <!-- QR Modal ===========================================================================================================================-->
 
                 <div class="modal fade" id="qrModal{{ asset.id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ asset.id }}" aria-hidden="true">
                     <div class="modal-dialog">
@@ -488,8 +856,8 @@
                                 </script>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary" onclick="printDiv('qrtag{{ asset.id }}')">Print</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                <button type="button" class="btn btn-primary" onclick="printDiv('qrtag{{ asset.id }}')">Imprimir</button>
                             </div>
                         </div>
                     </div>
@@ -577,6 +945,7 @@
             </nav>
         </div>
     </div>
+    
 </div>
 
 

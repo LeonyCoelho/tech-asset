@@ -1,16 +1,101 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
 from django.contrib.auth.models import User
-from app_tech_asset.forms import CategoryForm, SubCategoryForm, SectorForm,SubSectorForm, RentalCompanyForm, AssetForm, GlobalForm
-from app_tech_asset.models import Category, SubCategory, Sector,SubSector , RentalCompany, Asset, AssetHistory, GlobalSettings
+from app_tech_asset.forms import CategoryForm, SubCategoryForm, SectorForm,SubSectorForm, RentalCompanyForm, AssetForm, GlobalForm, KitForm
+from app_tech_asset.models import Category, SubCategory, Sector, SubSector , RentalCompany, Asset, AssetHistory, GlobalSettings, Kit, KitHistory
 from django.core.paginator import Paginator
 import qrcode
 from io import BytesIO
 
 
 def home(request):
-    return render(request, 'home.html')
+    asset_list = Asset.objects.all()
+    sector_list_alt = Sector.objects.prefetch_related('subsector_set').all()
+    subsector_list_alt = SubSector.objects.all()
 
+    sectorform = SectorForm()
+    subsectorform = SubSectorForm()
+
+    # Adicionando paginação
+    paginator = Paginator(asset_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'sector_list_alt': sector_list_alt,
+        'subsector_list_alt': subsector_list_alt,
+        'sectorform': sectorform,
+        'subsectorform': subsectorform,
+    }
+    return render(request, 'home.html', context)
+
+def list_asset(request):
+    asset_list = Asset.objects.all()
+    sector_list = Sector.objects.all()
+    subsector_list = SubSector.objects.all()
+    sector_list_alt = Sector.objects.prefetch_related('subsector_set').all()
+    subsector_list_alt = SubSector.objects.all()
+    kit_list = Kit.objects.all()
+
+    sectorform = SectorForm()
+    subsectorform = SubSectorForm()
+    kitform = KitForm()
+
+    paginator = Paginator(asset_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'page_obj': page_obj,
+        'asset_list': asset_list,
+        'sector_list': sector_list,
+        'subsector_list': subsector_list,
+        'sector_list_alt': sector_list_alt,
+        'subsector_list_alt': subsector_list_alt,
+        'kit_list': kit_list,
+        'sectorform': sectorform,
+        'subsectorform': subsectorform,
+        'kitform': kitform,        
+    }
+    return render(request, 'list_asset.html', context)
+
+def filter_assets(request):
+    assets = Asset.objects.all()
+
+    name = request.GET.get('name')
+    sector = request.GET.get('sector')
+    subsector = request.GET.get('subsector')
+    category = request.GET.get('category')
+    subcategory = request.GET.get('subcategory')
+    rentalcompany = request.GET.get('rentalcompany')
+    internalcode1 = request.GET.get('internalcode1')
+    internalcode2 = request.GET.get('internalcode2')
+    internalcode3 = request.GET.get('internalcode3')
+
+    if name:
+        assets = assets.filter(name__icontains=name)
+    if sector:
+        assets = assets.filter(sector__name__icontains=sector)
+    if subsector:
+        assets = assets.filter(subsector__name__icontains=subsector)
+    if category:
+        assets = assets.filter(category__name__icontains=category)
+    if subcategory:
+        assets = assets.filter(subcategory__name__icontains=subcategory)
+    if rentalcompany:
+        assets = assets.filter(rental_company__name__icontains=rentalcompany)
+    if internalcode1:
+        assets = assets.filter(internal_code1__icontains=internalcode1)
+    if internalcode2:
+        assets = assets.filter(internal_code2__icontains=internalcode2)
+    if internalcode3:
+        assets = assets.filter(internal_code3__icontains=internalcode3)
+
+    context = {
+        'assets': assets,
+    }
+    return render(request, 'filtered_assets.html', context)
 
 def preferences(request):
     categoryform = CategoryForm()
@@ -28,6 +113,7 @@ def preferences(request):
         'globalform': globalform,
     }
     return render(request, 'preferences.html', context)
+
 def global_settings(request):
     if request.method == 'POST':
         globalform = GlobalForm(request.POST)
@@ -57,6 +143,7 @@ def global_settings(request):
             globalform = GlobalForm()
 
     return render(request, 'global_settings.html', {'globalform': globalform})
+
 def new_category(request):
     if request.method == 'POST':
         categoryform = CategoryForm(request.POST)
@@ -87,15 +174,87 @@ def new_sector(request):
     else:
         sectorform = SectorForm()
 
+def delete_sector(request, id):
+    sector = get_object_or_404(Sector, id=id)
+    if request.method == 'POST':
+        sector.delete()
+        return redirect('list_asset')
+
 def new_subsector(request):
     if request.method == 'POST':
         subsectorform = SubSectorForm(request.POST)
         if subsectorform.is_valid():
-            new_subsector = Sector(name=subsectorform.cleaned_data['Novo_SubSetor'])
+            parent_sector = subsectorform.cleaned_data['parent']
+            new_subsector_name = subsectorform.cleaned_data['Novo_SubSetor']
+            new_subsector = SubSector(name=new_subsector_name, parent=parent_sector)
             new_subsector.save()
-            return HttpResponseRedirect("/preferences/")
+            return redirect('list_asset')
     else:
         subsectorform = SubSectorForm()
+
+# def new_kit(request):
+#     if request.method == 'POST':
+#         new_kitform = KitForm(request.POST)
+#         if new_kitform.is_valid():
+#             new_kit = new_kitform.save()
+#             selected_assets = request.POST.getlist('assets')
+#             new_kit.assets.set(selected_assets)
+            
+#             # Obtenha os nomes dos setores e subsetores se estiverem presentes
+#             sector_name = new_kit.sectors.name if new_kit.sectors else ''
+#             subsector_name = new_kit.subsectors.name if new_kit.subsectors else ''
+
+#             kit_history = KitHistory.objects.create(
+#                 kit_id=new_kit,
+#                 modification_type='Creation',
+#                 user=request.user.username,
+#                 name=new_kit.name,
+#                 sector=sector_name,
+#                 subsector=subsector_name
+#             )
+            
+#             # Adicione os ativos selecionados ao KitHistory também
+#             kit_history.assets.set(selected_assets)
+
+#             return redirect('list_asset')
+#     else:
+#         new_kitform = KitForm()
+#     return redirect('list_assets')
+
+def new_kit(request):
+    if request.method == 'POST':
+        new_kitform = KitForm(request.POST)
+        if new_kitform.is_valid():
+            new_kit = new_kitform.save()
+            selected_assets = request.POST.getlist('assets')
+            
+            # Associar assets ao kit
+            for asset_id in selected_assets:
+                asset = get_object_or_404(Asset, id=asset_id)
+                asset.kit = new_kit
+                asset.save()
+            
+            # Registrar histórico do kit
+            KitHistory.objects.create(
+                kit_id=new_kit,
+                modification_type='Creation',
+                user=request.user.username,
+                name=new_kit.name,
+                sector=new_kit.sectors.name if new_kit.sectors else '',
+                subsector=new_kit.subsectors.name if new_kit.subsectors else '',
+            )
+            
+            return redirect('list_asset')
+        else:
+            return HttpResponse("Invalid form", status=400)
+    return HttpResponse("Invalid request method", status=405)
+
+
+def delete_kit(request, id):
+    kit = get_object_or_404(Kit, id=id)
+    if request.method == 'POST':
+        kit.delete()
+        return redirect('list_asset')
 
 def new_rentalcompany(request):
     if request.method == 'POST':
@@ -106,26 +265,6 @@ def new_rentalcompany(request):
             return HttpResponseRedirect("/preferences/")
     else:
         rentalcompanyform = RentalCompanyForm()
-
-
-def list_asset(request):
-    asset_list = Asset.objects.all()
-    sector_list = Sector.objects.all()
-    subsector_list = SubSector.objects.all()
-
-    # Adicionando paginação
-    paginator = Paginator(asset_list, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    context = {
-        'page_obj': page_obj,
-        'sector_list': sector_list,
-        'subsector_list': subsector_list,
-        
-    }
-    return render(request, 'list_asset.html', context)
-
 
 def new_asset(request):
     if request.method == 'POST':
@@ -167,7 +306,7 @@ def new_asset(request):
 
         AssetHistory.objects.create(
             asset_id=asset,
-            modification_type='Criação',
+            modification_type='Creation',
             name=asset.name,
             category=asset.category.name,
             modified=asset.modified,
@@ -188,6 +327,40 @@ def new_asset(request):
     else:
 
         return render(request, 'new_asset.html')
+    
+def view_asset(request, id):
+    # Recuperar o ativo existente
+    asset = get_object_or_404(Asset, id=id)
+    history_list = AssetHistory.objects.filter(asset_id=asset).order_by('-modified')
+    
+    paginator = Paginator(history_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    if request.method == 'POST':
+        # Processar o formulário enviado
+        asset.name = request.POST.get('name')
+        asset.rental_company = get_object_or_404(RentalCompany, id=request.POST.get('rental_company'))
+        asset.internal_code1 = request.POST.get('internal_code1')
+        asset.internal_code2 = request.POST.get('internal_code2')
+        asset.internal_code3 = request.POST.get('internal_code3')
+        asset.serial_number = request.POST.get('serial_number')
+        asset.brand = request.POST.get('brand')
+        asset.mac_address = request.POST.get('mac_address')
+        asset.windows_license = request.POST.get('windows_license')
+        
+        asset.save()
+        
+        return redirect('list_asset')
+    
+    else:
+        
+        context = {
+            'asset': asset,
+            'page_obj': page_obj,
+        }
+        
+        return render(request, 'view_asset.html', context)
     
 def delete_asset(request, id):
     asset = get_object_or_404(Asset, id=id)
@@ -232,7 +405,11 @@ def transfer_asset(request, id):
             serial_number=asset.serial_number,
             brand=asset.brand,
             mac_address=asset.mac_address,
-            windows_license=asset.windows_license
+            windows_license=asset.windows_license,
+            previous_sector=previous_sector,
+            previous_subsector=previous_subsector,
+            new_sector=new_sector,
+            new_subsector=new_subsector,
         )
         
         return redirect('list_asset')
@@ -305,6 +482,53 @@ def history(request, id):
         'page_obj': page_obj,
     }
     return render(request, 'history.html', context)
+
+def transfer_kit(request, id):
+    kit = get_object_or_404(Kit, id=id)
+    if request.method == 'POST':
+        new_sector_id = request.POST.get('sector')
+        new_subsector_id = request.POST.get('subsector')
+        
+        # Salvar o estado anterior do kit para registrar no histórico
+        previous_sector = kit.sectors
+        previous_subsector = kit.subsectors
+        print(previous_sector, '-', previous_subsector)
+        
+        if new_sector_id:
+            new_sector = get_object_or_404(Sector, id=new_sector_id)
+            kit.sectors = new_sector            
+        if new_subsector_id:
+            new_subsector = get_object_or_404(SubSector, id=new_subsector_id)
+            kit.subsectors = new_subsector
+        else:
+            kit.subsector = None
+            
+        print(new_sector, '-', new_subsector)
+        kit.save()
+
+        for asset in kit.assets.all():
+            asset.sector = new_sector
+            asset.subsector = new_subsector
+            asset.save()
+        
+        # Criar registro no histórico
+        KitHistory.objects.create(
+            kit_id=kit,
+            modification_type='Transfer',
+            name=kit.name,
+            modified=kit.modified,
+            user=request.user.username,
+            sector=new_sector.name if new_sector else (previous_sector.name if previous_sector else ''),
+            subsector=new_subsector.name if new_subsector else (previous_subsector.name if previous_subsector else ''),
+            previous_sector=previous_sector,
+            previous_subsector=previous_subsector,
+            new_sector=new_sector,
+            new_subsector=new_subsector,
+        )
+        
+        return redirect('list_asset')
+    return redirect('list_asset')
+
     
 
     # =================== UTILITY ===================================
