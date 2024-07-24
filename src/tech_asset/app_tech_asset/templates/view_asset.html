@@ -2,7 +2,7 @@
 {% block content %}
 {% load static %}
 <div class="container">
-    <div class="card mt-3">
+            <div class="card mt-3">
         <div class="card-body">
             <div id="qrtagView{{ asset.id }}">
                 <div  class="row">
@@ -82,9 +82,15 @@
                     {% for entry in page_obj %}
                     <tr>
                         <td>{{ entry.modified }}</td>
-                        <td>{{ entry.modification_type }}</td>
+                        <td>{% if entry.modification_type == 'Transfer' %}<span class="badge rounded-pill text-bg-primary">Tranferência</span>{% endif %} 
+                            {% if entry.modification_type == 'Creation' %}<span class="badge rounded-pill text-bg-secondary">Criação</span>{% endif %} 
+                            {% if entry.modification_type == 'Delete' %}<span class="badge rounded-pill text-bg-danger">Deletado</span>{% endif %}</td>
                         <td>{{ entry.user }}</td>
-                        <td>{{ entry.details }}</td>
+                        <td>
+                            {% if entry.modification_type == 'Transfer' %}
+                                {{ entry.previous_sector }}{% if entry.previous_subsector %} - {{ entry.previous_subsector }}{% endif %} <i class="nf nf-fa-arrow_right_long"></i> {{ entry.new_sector }}{% if entry.new_subsector %} - {{ entry.new_subsector }}{% endif %}
+                            {% endif %}
+                        </td>
                     </tr>
                     {% empty %}
                     <tr>

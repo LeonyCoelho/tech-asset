@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% block content %}
+{% load static %}
+<div class="container">
+
+    {{ kit.name }}
+
+    {% for asset in kit.asset_set.all %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <div id="qrtagView{{ asset.id }}">
+                    <div  class="row">
+                        <div class="col-auto">                        
+                            <div id="qrCodeContainerView{{asset.id}}"></div>
+                        </div>
+                        <div class="col">
+                            <h1 class="mt-3">{{asset.name}} - {{asset.internal_code1}}</h1>
+                            <h4>{{asset.category}}{% if asset.subcategory%} - {{asset.subcategory}}{% endif %}</h4>
+                            {% if asset.added %}<p><b>Criado:</b> {{asset.added}}</p>{% endif %}
+                            {% if asset.rental_company %}<p><b>Empresa:</b> {{asset.rental_company}}</p>{% endif %}
+                            {% if asset.brand %}<b>Marca:</b> {{asset.brand}}</p>{% endif %}
+                            {% if asset.mac_address %}<p><b>Endereço Mac:</b> {{asset.mac_address}}</p>{% endif %}
+                            {% if asset.serial_number %}<b>Numero de série:</b> {{asset.serial_number}}</p>{% endif %}
+                            {% if asset.internalcode2 %}<b>{{global_settings.internalcode02}}:</b> {{asset.internalcode2}}</p>{% endif %}
+                            {% if asset.internalcode3 %}<b>{{global_settings.internalcode03}}</b> {{asset.internalcode3}}</p>{% endif %}
+                            {% if asset.internalcode2 %}<b>Numero de série:</b> {{asset.serial_number}}</p>{% endif %}
+                        </div>
+                    </div>
+                    <div class="ms-3 mb-3 mt-3">
+                        <a href="{% url 'edit_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i> Editar</a>
+                        <button class="btn btn-secondary btn-sm" id="generateQR{{asset.id}}" data-bs-toggle="modal" data-bs-target="#qrModal{{ asset.id }}"><i class="nf nf-md-qrcode"></i> Etiqueta</button>
+                        <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferModal{{ asset.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i> Movimentar</a>
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ asset.id }}"><i class="nf nf-md-delete"></i> Deletar</button>
+                    </div>
+                </div>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                <script>
+                    $(document).ready(function() {
+                        
+                            $.ajax({
+                                type: 'GET',
+                                url: '{% url "generate_qr_code" asset.id %}',
+                                xhrFields: {
+                                    responseType: 'blob'
+                                },
+                                success: function(data) {
+                                    var reader = new FileReader();
+                                    reader.onload = function(e) {
+                                        $('#qrCodeContainerView{{asset.id}}').html('<img src="' + e.target.result + '" alt="QR Code" class="qrcode-view">');
+                                    }
+                                    reader.readAsDataURL(data);
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error:", error);
+                                }
+                            });
+                        });
+
+
+                    function printDiv(divId) {
+                        var content = document.getElementById(divId).innerHTML;
+                        var originalContent = document.body.innerHTML;
+
+                        document.body.innerHTML = content;
+
+                        window.print();
+
+                        document.body.innerHTML = originalContent;
+                    }
+                </script>
+            </div>
+        </div>
+
+
+                <!-- QR Modal ===========================================================================================================================-->
+
+                <div class="modal fade" id="qrModal{{ asset.id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ asset.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="qrModalLabel{{ asset.id }}">QR-Code {{ asset.name }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="qrtag{{ asset.id }}">
+                                    <div  class="row">
+                                        <div class="col-12 text-center">
+                                        </div>
+                                        <div class="col-auto text-center">
+                                            
+                                            <div id="qrCodeContainer{{asset.id}}"></div>
+                                        </div>
+                                        <div class="col">
+                                            <img src="{% static 'img/hegvses.png' %}" class="logo_print">
+                                            <p><b>GESTÃO DE ATIVOS DE TI</b>
+                                            <br><b style="font-size: 26px;">{{ asset.internal_code1}}</b>
+                                            <br>EMPRESA: {{ asset.rental_company}}
+                                            <br>Ramal: 374</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                                <script>
+                                    $(document).ready(function() {
+                                        $('#generateQR{{asset.id}}').click(function() {
+                                            $.ajax({
+                                                type: 'GET',
+                                                url: '{% url "generate_qr_code" asset.id %}',
+                                                xhrFields: {
+                                                    responseType: 'blob'
+                                                },
+                                                success: function(data) {
+                                                    var reader = new FileReader();
+                                                    reader.onload = function(e) {
+                                                        $('#qrCodeContainer{{asset.id}}').html('<img src="' + e.target.result + '" alt="QR Code" class="qrcode">');
+                                                    }
+                                                    reader.readAsDataURL(data);
+                                                },
+                                                error: function(xhr, status, error) {
+                                                    console.error("Error:", error);
+                                                }
+                                            });
+                                        });
+                                    });
+
+                                    function printDiv(divId) {
+                                        var content = document.getElementById(divId).innerHTML;
+                                        var originalContent = document.body.innerHTML;
+
+                                        document.body.innerHTML = content;
+
+                                        window.print();
+
+                                        document.body.innerHTML = originalContent;
+                                    }
+                                </script>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                <button type="button" class="btn btn-primary" onclick="printDiv('qrtag{{ asset.id }}')">Imprimir</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>          
+                <script>
+                    $(document).ready(function(){
+                        console.log("Document ready");
+                        $('#id_sector_t_{{asset.id}}').change(function(){
+                            console.log("Setor change event");
+                            var sector_id = $(this).val();
+                            $.ajax({
+                                url: '/get_subsectors/',
+                                data: {'sector_id': sector_id},
+                                dataType: 'json',
+                                success: function(data){
+                                    console.log("Subsectors received:", data.subsectors);
+                                    $('#id_subsector_t_{{asset.id}}').empty();
+                                    $.each(data.subsectors, function(index, subsector){
+                                        $('#id_subsector_t_{{asset.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                                    });
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error:", error);
+                                }
+                            });
+                        });
+                    });
+                </script>
+
+
+                <!-- Delete Modal =================================================================================================================-->
+
+                <div class="modal fade" id="deleteModal{{ asset.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ asset.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ asset.id }}">Deseja remover {{ asset.name }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'delete_asset' asset.id %}">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                 <!-- Transfer Modal ============================================================================================================================-->
+
+                 <div class="modal fade" id="transferModal{{ asset.id }}" tabindex="-1" aria-labelledby="transferModalLabel{{ asset.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h1 class="modal-title fs-5" id="transferModalLabel{{ asset.id }}">Transfer {{ asset.name }}</h1>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form method="post" action="{% url 'transfer_asset' asset.id %}">
+                                    {% csrf_token %}
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="id_sector">Setor:</label>
+                                                <select name="sector" id="id_sector_t_{{asset.id}}" class="form-control" required>
+                                                    {% for sector in sectors %}
+                                                    <option value="{{ sector.id }}">{{ sector.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                                {% if asset.sector %}<p>Atual: {{ asset.sector }}</p>{% endif %}
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="id_subsector">SubSetor:</label>
+                                                <select name="subsector" id="id_subsector_t_{{asset.id}}" class="form-control">
+                                                    
+                                                </select>
+                                                {% if asset.subsector %}<p>Atual: {{ asset.subsector }}</p>{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>             
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                                        <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                                    </div>
+                                </form>           
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+    {% endfor %}
+
+
+    <div class="card mt-3">
+        <div class="card-header">Histórico</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Tipo de Modificação</th>
+                        <th>Usuário</th>
+                        <th>Detalhes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in page_obj %}
+                    <tr>
+                        <td>{{ entry.modified }}</td>
+                        <td>{% if entry.modification_type == 'Transfer' %}<span class="badge rounded-pill text-bg-primary">Tranferência</span>{% endif %} 
+                            {% if entry.modification_type == 'Creation' %}<span class="badge rounded-pill text-bg-secondary">Criação</span>{% endif %} 
+                            {% if entry.modification_type == 'Delete' %}<span class="badge rounded-pill text-bg-danger">Deletado</span>{% endif %}</td>
+                        <td>{{ entry.user }}</td>
+                        <td>
+                            {% if entry.modification_type == 'Transfer' %}
+                                {{ entry.previous_sector }}{% if entry.previous_subsector %} - {{ entry.previous_subsector }}{% endif %} <i class="nf nf-fa-arrow_right_long"></i> {{ entry.new_sector }}{% if entry.new_subsector %} - {{ entry.new_subsector }}{% endif %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4">Nenhum histórico encontrado para este ativo.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1" aria-label="First">
+                            <span aria-hidden="true">&laquo;&laquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > page_obj.number|add:-3 and num < page_obj.number|add:3 %}
+                            <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}" aria-label="Last">
+                            <span aria-hidden="true">&raquo;&raquo;</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>    
+</div>
+
+{% endblock %}

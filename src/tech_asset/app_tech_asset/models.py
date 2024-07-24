@@ -60,8 +60,7 @@ class Asset(models.Model):
     brand = models.CharField(null=True, max_length=50)
     mac_address = models.CharField(null=True, max_length=50)
     windows_license = models.CharField(null=True, max_length=50)
-    kit = models.ForeignKey(Kit, on_delete=models.SET_NULL, null=True, blank=True)  # Novo campo para Kit
-
+    kit = models.ForeignKey(Kit, on_delete=models.SET_NULL, null=True, blank=True)
     def __str__(self):
         return self.name
 class KitHistory(models.Model):
@@ -111,6 +110,7 @@ class AssetHistory(models.Model):
     brand = models.CharField(null=True, max_length=50)
     mac_address = models.CharField(null=True, max_length=50)
     windows_license = models.CharField(null=True, max_length=50)
+    kit = models.CharField(null=True, max_length=50)
     def __str__(self):
         return self.name
 

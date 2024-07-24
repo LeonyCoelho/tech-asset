@@ -80,14 +80,16 @@
                                     <div class="col-md-3">
                                         <label for="id_category">Categoria:</label>
                                         <select name="category" id="id_category" class="form-control" required>
+                                            <option hidden selected disabled value="">Selecione uma Categoria</option>
                                             {% for category in categories %}
                                             <option value="{{ category.id }}">{{ category.name }}</option>
                                             {% endfor %}
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <label for="id_subcategory">SubCategoria:</label>
+                                        <label for="id_subcategory">Subcategoria:</label>
                                         <select name="subcategory" id="id_subcategory" class="form-control">
+                                            <option hidden selected disabled value="">Selecione uma Subcategoria</option>
 
                                         </select>
                                     </div>
@@ -95,6 +97,7 @@
                                         <label for="id_sector">Setor:</label>
                                         <select name="sector" id="id_sector" class="form-control" required>
                                             {% for sector in sectors %}
+                                            <option hidden selected disabled value="">Selecione um Setor</option>
                                             <option value="{{ sector.id }}">{{ sector.name }}</option>
                                             {% endfor %}
                                         </select>
@@ -102,6 +105,7 @@
                                     <div class="col-md-3">
                                         <label for="id_subsector">SubSetor:</label>
                                         <select name="subsector" id="id_subsector" class="form-control">
+                                            <option hidden selected disabled value="">Selecione uma Subsetor</option>
 
                                         </select>
                                     </div>
@@ -111,6 +115,7 @@
                                         <label for="id_rental_company">Empresa:</label>
                                         <select name="rental_company" id="id_rental_company" class="form-control" required>
                                             {% for rental_company in rental_companies %}
+                                            <option hidden selected disabled value="">Selecione uma Empresa</option>
                                             <option value="{{ rental_company.id }}">{{ rental_company.name }}</option>
                                             {% endfor %}
                                         </select>
@@ -381,8 +386,8 @@
                                                                 <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferKitModal{{ kit.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
                                                                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteKitModal{{ kit.id }}"><i class="nf nf-md-delete"></i></button>
                                                             </li>
-                                                            {% for asset in kit.assets.all %}
-                                                            <li class="list-group-item">{{asset.id}} - {{ asset.name }} - {{asset.internal_code1}}</li>
+                                                            {% for asset in kit.asset_set.all %}
+                                                            <li class="list-group-item">{{ asset.id }} - {{ asset.name }} - {{ asset.internal_code1 }}</li>
                                                             {% endfor %}
                                                         </ul>
                                                     </div>
@@ -463,55 +468,57 @@
                                 <!-- Modal -->
                                 <div class="modal fade" id="newkitModal" tabindex="-1" aria-labelledby="newkitModalLabel" aria-hidden="true">
                                     <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="newkitModalLabel">New Kit</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <form method="post" action="{% url 'new_kit' %}">
-                                                {% csrf_token %}
-                                                {{ kitform.name }}
-                                                <input type="text" id="asset-search" class="form-control mb-3" placeholder="Pesquisar ativos">
-                                                
-                                                <div id="asset-list" class="form-check">
-                                                    {% for asset in asset_list %}
-                                                        <div class="form-check">
-                                                            <input class="form-check-input asset-checkbox" type="checkbox" name="assets" value="{{ asset.id }}" id="asset{{ asset.id }}">
-                                                            <label class="form-check-label" for="asset{{ asset.id }}">
-                                                            {{asset.internal_code1}} - {{asset.name}}
-                                                            </label>
-                                                        </div>
-                                                    {% endfor %}
-                                                </div>
-                                    
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h1 class="modal-title fs-5" id="newkitModalLabel">New Kit</h1>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                             </div>
-                                            <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Enviar</button>
-                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                            </form>
-                                            <script>
-                                                document.addEventListener("DOMContentLoaded", function() {
-                                                    const searchInput = document.getElementById("asset-search");
-                                                    const assetCheckboxes = document.querySelectorAll(".asset-checkbox");
-                                        
-                                                    searchInput.addEventListener("input", function() {
-                                                        const filter = searchInput.value.toLowerCase();
-                                                        assetCheckboxes.forEach(checkbox => {
-                                                            const label = checkbox.nextElementSibling.textContent.toLowerCase();
-                                                            if (label.includes(filter)) {
-                                                                checkbox.parentElement.style.display = "";
-                                                            } else {
-                                                                checkbox.parentElement.style.display = "none";
-                                                            }
-                                                        });
-                                                    });
-                                                });
-                                            </script>
+                                            <div class="modal-body">
+                                                <form method="post" action="{% url 'new_kit' %}">
+                                                    {% csrf_token %}
+                                                    {{ kitform.name }}
+                                                    {{ kitform.sectors }}
+                                                    {{ kitform.subsectors }}
+                                                    <input type="text" id="asset-search" class="form-control mb-3" placeholder="Pesquisar ativos">
+                                                    
+                                                    <div id="asset-list" class="form-check">
+                                                        {% for asset in asset_list %}
+                                                            <div class="form-check">
+                                                                <input class="form-check-input asset-checkbox" type="checkbox" name="assets" value="{{ asset.id }}" id="asset{{ asset.id }}">
+                                                                <label class="form-check-label" for="asset{{ asset.id }}">
+                                                                    {{ asset.internal_code1 }} - {{ asset.name }}
+                                                                </label>
+                                                            </div>
+                                                        {% endfor %}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="submit" class="btn btn-primary">Enviar</button>
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                </form>
+                                            </div>
                                         </div>
                                     </div>
-                                    </div>
-                                </div>  
+                                </div>
+                                <script>
+                                    document.addEventListener("DOMContentLoaded", function() {
+                                        const searchInput = document.getElementById("asset-search");
+                                        const assetCheckboxes = document.querySelectorAll(".asset-checkbox");
+                                
+                                        searchInput.addEventListener("input", function() {
+                                            const filter = searchInput.value.toLowerCase();
+                                            assetCheckboxes.forEach(checkbox => {
+                                                const label = checkbox.nextElementSibling.textContent.toLowerCase();
+                                                if (label.includes(filter)) {
+                                                    checkbox.parentElement.style.display = "";
+                                                } else {
+                                                    checkbox.parentElement.style.display = "none";
+                                                }
+                                            });
+                                        });
+                                    });
+                                </script>
+                                
                                 
                                 
                             </div>
@@ -756,7 +763,7 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="transferModalLabel{{ asset.id }}">Transfer {{ asset.name }}</h1>
+                                <h1 class="modal-title fs-5" id="transferModalLabel{{ asset.id }}">Realizar movimentalção {{ asset.name }}</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
@@ -768,17 +775,16 @@
                                                 <label for="id_sector">Setor:</label>
                                                 <select name="sector" id="id_sector_t_{{asset.id}}" class="form-control" required>
                                                     {% for sector in sectors %}
+                                                    <option hidden selected disabled></option>
                                                     <option value="{{ sector.id }}">{{ sector.name }}</option>
                                                     {% endfor %}
                                                 </select>
-                                                {% if asset.sector %}<p>Atual: {{ asset.sector }}</p>{% endif %}
                                             </div>
                                             <div class="col-6">
                                                 <label for="id_subsector">SubSetor:</label>
                                                 <select name="subsector" id="id_subsector_t_{{asset.id}}" class="form-control">
-                                                    
+                                                    <option hidden selected disabled></option>
                                                 </select>
-                                                {% if asset.subsector %}<p>Atual: {{ asset.subsector }}</p>{% endif %}
                                             </div>
                                         </div>
                                     </div>             

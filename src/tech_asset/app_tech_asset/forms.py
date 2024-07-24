@@ -24,6 +24,15 @@ class CategoryForm(forms.Form):
 
 class SubCategoryForm(forms.Form):
     Nova_SubCategoria = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    parent = forms.ModelChoiceField(
+        queryset=Category.objects.all(), 
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Selecione a Categoria"
+    )
+    Nova_SubCategoria = forms.CharField(
+        max_length=50, 
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Novo Subsetor'})
+    )
 
 class SectorForm(forms.Form):
     Novo_Setor = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder':'Novo Setor'}))
@@ -54,23 +63,33 @@ class KitForm(forms.ModelForm):
             'sectors': forms.Select(attrs={'class': 'form-control mb-3'}),
             'subsectors': forms.Select(attrs={'class': 'form-control mb-3'}),
         }
+        
 class RentalCompanyForm(forms.Form):
     Nova_Empresa = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
 
 class AssetForm(forms.Form):
     name = forms.CharField(max_length=50, widget=forms.TextInput(attrs={'class': 'form-control'}))
-    category = forms.ModelChoiceField(queryset=Category.objects.all(), widget=forms.Select(attrs={'class': 'form-select'}))
-    subcategory = forms.ModelChoiceField(queryset=SubCategory.objects.all(), required=False,  widget=forms.Select(attrs={'class': 'form-select'}))
-    sector = forms.ModelChoiceField(queryset=Sector.objects.all(), widget=forms.Select(attrs={'class': 'form-select'}))
-    subsector = forms.ModelChoiceField(queryset=SubSector.objects.all(), required=False, widget=forms.Select(attrs={'class': 'form-select'}))
+    category = forms.ModelChoiceField(
+        queryset=Category.objects.all(),
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Selecione o Setor"
+        )
+    subcategory = forms.ModelChoiceField(
+        queryset=SubCategory.objects.all(),
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Selecione o Setor"
+        )
     sector = forms.ModelChoiceField(
         queryset=Sector.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Setor'})
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Selecione o Setor"
     )
     subsector = forms.ModelChoiceField(
         queryset=SubSector.objects.all(),
         required=False,
-        widget=forms.Select(attrs={'class': 'form-select', 'placeholder': 'Subsetor'})
+        widget=forms.Select(attrs={'class': 'form-select'}),
+        empty_label="Selecione o Setor"
     )
     rental_company = forms.ModelChoiceField(queryset=RentalCompany.objects.all(), widget=forms.Select(attrs={'class': 'form-select'}))
     internal_code1 = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))

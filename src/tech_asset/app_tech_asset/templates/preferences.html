@@ -82,6 +82,157 @@
                 </div>
             </div>
         </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                Categorias e Subcategorias
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-4">
+                        <form method="post" class="mb-3" action="{% url 'new_category' %}">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            {{ categoryform.Nova_Categoria }}
+                            <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                    </div>
+                    </form>
+                    <div class="category-list">
+                        <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
+                            <ul class="list-group" id="category-list">
+                                {% for category in category_list %}
+                                <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showSubcategorys('{{ category.id }}')">
+                                    {{ category.name }}
+                                    <a href="#" class="btn btn-outline-danger btn-sm" onclick="deletecategory('{{ category.id }}', event)"><i class="nf nf-md-delete"></i></a>
+                                </li>
+                                {% endfor %}
+                            </ul>  
+                        </div>
+                    </div>
+                </div>
+                <div class="col-8">
+                    <form method="post" class="mb-3" action="{% url 'new_subcategory' %}">
+                        {% csrf_token %}                                    
+                        <div class="input-group mb-3">
+                            {{ subcategoryform.parent }}
+                            {{ subcategoryform.Nova_SubCategoria }}
+                            <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                        </div>
+                    </form>
+                    <div class="category-list">
+                        <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                            <ul class="list-group" id="subcategory-list">
+                                <!-- Subsetores serão inseridos aqui -->
+                            </ul>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    // Adiciona uma mensagem de depuração para verificar se o script está sendo carregado
+    console.log("Script carregado");
+
+    // Criar um objeto vazio para armazenar setores
+    const categorys = {};
+
+    // Adiciona setores ao objeto com base nos dados do template
+    {% for category in category_list %}
+    categorys['{{ category.id }}'] = [
+        {% for subcategory in category.subcategory_set.all %}
+        {id: '{{ subcategory.id }}', name: '{{ subcategory.name }}'},
+        {% endfor %}
+    ];
+    {% endfor %}
+
+    // Adiciona uma mensagem de depuração para verificar se os setores foram carregados corretamente
+    console.log("Setores carregados:", categorys);
+
+    function showSubcategorys(categoryId) {
+        // Adiciona uma mensagem de depuração para verificar se a função está sendo chamada
+        console.log("showSubcategorys chamado para o setor:", categoryId);
+
+        const subcategoryList = document.getElementById('subcategory-list');
+        subcategoryList.innerHTML = ''; // Limpar lista de subsetores
+
+        if (categorys[categoryId]) {
+            categorys[categoryId].forEach(subcategory => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.textContent = subcategory.name;
+
+                // Cria o botão de exclusão
+                const deleteButton = document.createElement('a');
+                deleteButton.className = 'btn btn-outline-danger btn-sm';
+                deleteButton.innerHTML = '<i class="nf nf-md-delete"></i>';
+                deleteButton.href = '#';
+                deleteButton.onclick = function(event) {
+                    event.preventDefault();
+                    deleteSubcategory(subcategory.id);
+                };
+
+                // Adiciona o botão de exclusão ao item da lista
+                li.appendChild(deleteButton);
+                subcategoryList.appendChild(li);
+            });
+        } else {
+            console.log("Nenhum subsetor encontrado para o setor:", categoryId);
+        }
+    }
+
+    function deleteSubcategory(subcategoryId) {
+        console.log("Deletar subcategory com ID:", subcategoryId);
+
+        // Envia uma solicitação de exclusão para o servidor (exemplo de como isso pode ser feito com AJAX)
+        fetch(`/delete_subcategory/${subcategoryId}/`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Subcategory deletado com sucesso:", subcategoryId);
+                // Remover o subsetor do DOM
+                document.querySelector(`#subcategory-list li[data-id='${subcategoryId}']`).remove();
+            } else {
+                console.log("Erro ao deletar o subcategory:", subcategoryId);
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao enviar a solicitação de exclusão:", error);
+        });
+    }
+
+    function deletecategory(categoryId, event) {
+        event.preventDefault(); // Previne o comportamento padrão do link
+        event.stopPropagation(); // Impedir que o clique no botão de exclusão acione a função showSubcategorys
+        console.log("Deletar setor com ID:", categoryId);
+
+        // Envia uma solicitação de exclusão para o servidor (exemplo de como isso pode ser feito com AJAX)
+        fetch(`/preferences/category/delete/${categoryId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log("Setor deletado com sucesso:", categoryId);
+                // Remover o setor do DOM
+                document.querySelector(`#category-list li[onclick='showSubcategorys("${categoryId}")']`).remove();
+            } else {
+                console.log("Erro ao deletar o setor:", categoryId);
+            }
+        })
+        .catch(error => {
+            console.error("Erro ao enviar a solicitação de exclusão:", error);
+        });
+    }
+</script>
     </div>
 </div>
 {% endblock %}

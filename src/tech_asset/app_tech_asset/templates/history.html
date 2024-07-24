@@ -23,7 +23,7 @@
                         <td>{{ entry.user }}</td>
                         <td>
                             {% if entry.modification_type == 'Transfer' %}
-                                {{ entry.previous_sector }}{% if entry.previous_subsector %} - {{ entry.previous_subsector }}{% endif %} >> {{ entry.new_sector }}{% if entry.new_subsector %} - {{ entry.new_subsector }}{% endif %}
+                                {{ entry.previous_sector }}{% if entry.previous_subsector %} - {{ entry.previous_subsector }}{% endif %} <i class="nf nf-fa-arrow_right_long"></i> {{ entry.new_sector }}{% if entry.new_subsector %} - {{ entry.new_subsector }}{% endif %}
                             {% endif %}
                         </td>
                     </tr>
