@@ -30,6 +30,10 @@ body{
   height: 300px;
   }
   
+.qrcode-view-kit{
+    height: 180px;
+    }
+
 .logo_print{
     height: 35px;
 }

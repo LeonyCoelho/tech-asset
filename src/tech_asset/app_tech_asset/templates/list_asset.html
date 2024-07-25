@@ -381,9 +381,10 @@
                                                     <div class="accordion-body">
                                                         <ul class="list-group">
                                                             <li class="list-group-item">
-                                                                <a href="" class="btn btn-sm btn-secondary"><i class="nf nf-md-history"></i></a>
+                                                                <a href="{% url 'view_kit' kit.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-fa-eye"></i></a>
                                                                 <a href="" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
                                                                 <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferKitModal{{ kit.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
+                                                                <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editKitModal{{ kit.id }}"><i class="nf nf-md-rename_box"></i></a>
                                                                 <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteKitModal{{ kit.id }}"><i class="nf nf-md-delete"></i></button>
                                                             </li>
                                                             {% for asset in kit.asset_set.all %}
@@ -427,6 +428,32 @@
                                                                             {% if kit.subsector %}<p>Atual: {{ kit.subsector }}</p>{% endif %}
                                                                         </div>
                                                                     </div>
+                                                                </div>             
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                                                                    <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                                                                </div>
+                                                            </form>           
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Edit Kit Modal ============================================================================================================================-->
+
+                                            <div class="modal fade" id="editKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="editKitModalLabel{{ kit.id }}" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h1 class="modal-title fs-5" id="editKitModalLabel{{ kit.id }}">Edit {{ kit.name }}</h1>
+                                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <form method="post" action="{% url 'edit_kit' kit.id %}">
+                                                                {% csrf_token %}
+                                                                <div class="modal-body">
+                                                                        <label type="form-label">Nome do kit</label>
+                                                                        <input type="text" class="form-control" name="name" placeholder="{{kit.name}}">
                                                                 </div>             
                                                                 <div class="modal-footer">
                                                                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
@@ -749,7 +776,7 @@
                     <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.category %}{{ asset.category }}{% endif %}</td>
                     <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.subcategory %}{{ asset.subcategory }}{% endif %}</td>
                     <td>
-                        <a href="{% url 'history_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-history"></i></a>
+                        <a href="{% url 'view_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-fa-eye"></i></a>
                         <a href="{% url 'edit_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
                         <button class="btn btn-secondary btn-sm" id="generateQR{{asset.id}}" data-bs-toggle="modal" data-bs-target="#qrModal{{ asset.id }}"><i class="nf nf-md-qrcode"></i></button>
                         <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferModal{{ asset.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>

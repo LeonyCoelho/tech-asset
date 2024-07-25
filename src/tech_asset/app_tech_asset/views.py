@@ -306,12 +306,40 @@ def transfer_kit(request, id):
         kit.save()
 
         for asset in kit.asset_set.all():
+            previous_asset_sector = asset.sector
+            previous_asset_subsector = asset.subsector
             asset.sector = new_sector
             if new_subsector_id:
                 asset.subsector = new_subsector
             else:
                 asset.subsector = None
             asset.save()
+
+            # Criar registro no histórico do asset
+            AssetHistory.objects.create(
+                asset_id=asset,
+                modification_type='Transfer',
+                name=asset.name,
+                category=asset.category.name if asset.category else '',
+                modified=asset.modified,
+                user=request.user.username,
+                details=asset.details,
+                sector=new_sector.name if new_sector else '',
+                new_sector=new_sector.name if new_sector else '',
+                previous_sector=previous_asset_sector.name if previous_asset_sector else '',
+                subsector=new_subsector.name if new_subsector else '',
+                new_subsector=new_subsector.name if new_subsector else '',
+                previous_subsector=previous_asset_subsector.name if previous_asset_subsector else '',
+                rental_company=asset.rental_company.name if asset.rental_company else '',
+                internal_code1=asset.internal_code1,
+                internal_code2=asset.internal_code2,
+                internal_code3=asset.internal_code3,
+                serial_number=asset.serial_number,
+                brand=asset.brand,
+                mac_address=asset.mac_address,
+                windows_license=asset.windows_license,
+                kit=kit.name
+            )
         
         # Criar registro no histórico
         KitHistory.objects.create(
@@ -329,6 +357,19 @@ def transfer_kit(request, id):
         )
         
         return redirect('list_asset')
+    return redirect('list_asset')
+
+def edit_kit(request, id):
+    kit = get_object_or_404(Kit, id=id)
+    if request.method == 'POST':
+        kit.name = request.POST.get('name')
+        kit.save()
+    KitHistory.objects.create(
+        kit_id=kit,
+        modification_type='Edit',
+        user=request.user.username,
+        modified=kit.modified
+    )
     return redirect('list_asset')
 
 # RENTAL COMPANY ---------------------------------------------------------------------------------------

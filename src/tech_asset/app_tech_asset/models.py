@@ -43,6 +43,8 @@ class Kit(models.Model):
     subsectors = models.ForeignKey(SubSector, on_delete=models.SET_NULL, null= True)
     def __str__(self):
         return self.name
+    def asset_count(self):
+        return self.asset_set.count()
 class Asset(models.Model):
     name = models.CharField(null=False, max_length=50)
     category = models.ForeignKey(Category, null=True, on_delete=models.SET_NULL)

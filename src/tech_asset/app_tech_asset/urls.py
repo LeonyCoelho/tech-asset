@@ -29,6 +29,7 @@ urlpatterns = [
     path('kit/view/<int:id>', views.view_kit, name='view_kit'),
     path('kit/delete/<int:id>/', views.delete_kit, name='delete_kit'),
     path('kit/transfer/<int:id>/', views.transfer_kit, name='transfer_kit'),
+    path('kit/edit/<int:id>/', views.edit_kit, name='edit_kit'),
  
     path('get_subsectors/', views.get_subsectors, name='get_subsectors'),
     path('get_subcategories/', views.get_subcategories, name='get_subcategories'),
