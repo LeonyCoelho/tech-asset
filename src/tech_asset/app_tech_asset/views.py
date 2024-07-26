@@ -216,6 +216,12 @@ def new_subsector(request):
     else:
         subsectorform = SubSectorForm()
 
+def delete_subsector(request, id):
+    subsector = get_object_or_404(SubSector, id=id)
+    if request.method == 'POST':
+        subsector.delete()
+        return redirect('list_asset')
+    
 # KITS ---------------------------------------------------------------------------------------------
 def new_kit(request):
     if request.method == 'POST':
