@@ -8,9 +8,13 @@ urlpatterns = [
     path('preferences/global_settings/', views.global_settings, name='global_settings'),
     path('preferences/new_category/', views.new_category, name='new_category'),
     path('preferences/new_subcategory/', views.new_subcategory, name='new_subcategory'),
+
     path('preferences/new_sector/', views.new_sector, name='new_sector'),
     path('preferences/sector/delete/<int:id>/', views.delete_sector, name='delete_sector'),
+
     path('preferences/new_subsector/', views.new_subsector, name='new_subsector'),
+    path('preferences/subsector/delete/<int:id>/', views.delete_subsector, name='delete_subsector'),
+    
     path('preferences/new_rentalcompany/', views.new_rentalcompany, name='new_rentalcompany'),
 
     path('filter_assets', views.filter_assets, name='filter_assets'),
@@ -31,7 +35,8 @@ urlpatterns = [
     path('kit/transfer/<int:id>/', views.transfer_kit, name='transfer_kit'),
     path('kit/edit/<int:id>/', views.edit_kit, name='edit_kit'),
  
-    path('get_subsectors/', views.get_subsectors, name='get_subsectors'),
+    path('get_sectors/', views.get_sectors, name='get_sectors'),  # Para carregar os setores dinamicamente
+    path('get_subsectors/<int:id>/', views.get_subsectors, name='get_subsectors'),
     path('get_subcategories/', views.get_subcategories, name='get_subcategories'),
 
 ]

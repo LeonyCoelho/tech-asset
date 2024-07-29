@@ -209,7 +209,6 @@
                                 Setores e Subsetores
                             </div>
                             <div class="card-body">
-
                                 <div class="row">
                                     <div class="col-4">
                                         <form method="post" class="mb-3" action="{% url 'new_sector' %}">
@@ -222,142 +221,172 @@
                                         <div class="sector-list">
                                             <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
                                                 <ul class="list-group" id="sector-list">
-                                                    {% for sector in sector_list %}
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showSubsectors('{{ sector.id }}')">
-                                                        {{ sector.name }}
-                                                        <!-- <a href="#" class="btn btn-outline-danger btn-sm" onclick="deleteSector('{{ sector.id }}', event)"><i class="nf nf-md-delete"></i></a> -->
-                                                        <a href="{% url 'delete_sector' sector.id %}" class="btn btn-outline-danger btn-sm"><i class="nf nf-md-delete"></i></a>
-                                                    </li>
-                                                    {% endfor %}
-                                                </ul>  
+                                                    <!-- Setores serão inseridos aqui -->
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-8">
                                         <form method="post" class="mb-3" action="{% url 'new_subsector' %}">
-                                            {% csrf_token %}                                    
+                                            {% csrf_token %}
                                             <div class="input-group mb-3">
                                                 {{ subsectorform.parent }}
                                                 {{ subsectorform.Novo_SubSetor }}
                                                 <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
                                             </div>
                                         </form>
-                                        <div class="sector-list">
+                                        <div class="subsector-list">
                                             <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
                                                 <ul class="list-group" id="subsector-list">
                                                     <!-- Subsetores serão inseridos aqui -->
-                                                </ul>  
+                                                </ul>
                                             </div>
                                         </div>
                                     </div>
-                                    </div>
-
-
-
+                                </div>
                             </div>
                         </div>
                         <script>
-                            // Adiciona uma mensagem de depuração para verificar se o script está sendo carregado
-                            console.log("Script carregado");
-
-                            // Criar um objeto vazio para armazenar setores
-                            const sectors = {};
-
-                            // Adiciona setores ao objeto com base nos dados do template
-                            {% for sector in sector_list %}
-                            sectors['{{ sector.id }}'] = [
-                                {% for subsector in sector.subsector_set.all %}
-                                {id: '{{ subsector.id }}', name: '{{ subsector.name }}'},
-                                {% endfor %}
-                            ];
-                            {% endfor %}
-
-                            // Adiciona uma mensagem de depuração para verificar se os setores foram carregados corretamente
-                            console.log("Setores carregados:", sectors);
-
-                            function showSubsectors(sectorId) {
-                                // Adiciona uma mensagem de depuração para verificar se a função está sendo chamada
-                                console.log("showSubsectors chamado para o setor:", sectorId);
-
-                                const subsectorList = document.getElementById('subsector-list');
-                                subsectorList.innerHTML = ''; // Limpar lista de subsetores
-
-                                if (sectors[sectorId]) {
-                                    sectors[sectorId].forEach(subsector => {
-                                        const li = document.createElement('li');
-                                        li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                                        li.textContent = subsector.name;
-
-                                        // Cria o botão de exclusão
-                                        const deleteButton = document.createElement('a');
-                                        deleteButton.className = 'btn btn-outline-danger btn-sm';
-                                        deleteButton.innerHTML = '<i class="nf nf-md-delete"></i>';
-                                        deleteButton.href = '#';
-                                        deleteButton.onclick = function(event) {
-                                            event.preventDefault();
-                                            deleteSubsector(subsector.id);
-                                        };
-
-                                        // Adiciona o botão de exclusão ao item da lista
-                                        li.appendChild(deleteButton);
-                                        subsectorList.appendChild(li);
-                                    });
-                                } else {
-                                    console.log("Nenhum subsetor encontrado para o setor:", sectorId);
+                            document.addEventListener('DOMContentLoaded', function() {
+                                loadSectors();
+                        
+                                function loadSectors() {
+                                    fetch('/get_sectors/')
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            const sectorList = document.getElementById('sector-list');
+                                            sectorList.innerHTML = ''; // Limpar lista de setores
+                        
+                                            data.sectors.forEach(sector => {
+                                                const li = document.createElement('li');
+                                                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                                li.textContent = sector.name;
+                                                li.setAttribute('data-id', sector.id); // Adicionar data-id ao elemento li
+                        
+                                                li.onclick = function() {
+                                                    showSubsectors(sector.id);
+                                                };
+                        
+                                                // Cria o botão de exclusão
+                                                const deleteButton = document.createElement('a');
+                                                deleteButton.className = 'btn btn-outline-danger btn-sm';
+                                                deleteButton.innerHTML = '<i class="nf nf-md-delete"></i>';
+                                                deleteButton.href = '#';
+                                                deleteButton.onclick = function(event) {
+                                                    event.preventDefault();
+                                                    deleteSector(sector.id);
+                                                };
+                        
+                                                // Adiciona o botão de exclusão ao item da lista
+                                                li.appendChild(deleteButton);
+                                                sectorList.appendChild(li);
+                                            });
+                                        })
+                                        .catch(error => console.error('Erro ao carregar os setores:', error));
                                 }
-                            }
+                        
+                                function deleteSector(sectorId) {
+                                    console.log("Deletar setor com ID:", sectorId);
+                        
+                                    fetch(`/preferences/sector/delete/${sectorId}/`, {
+                                        method: 'POST', // Certifique-se de que o método é POST
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
+                                        },
+                                        body: JSON.stringify({
+                                            csrfmiddlewaretoken: '{{ csrf_token }}' // Inclui o token CSRF no corpo da solicitação
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            console.log("Setor deletado com sucesso:", sectorId);
+                                            // Remover o setor do DOM
+                                            document.querySelector(`#sector-list li[data-id='${sectorId}']`).remove();
+                                            // Limpar a lista de subsetores ao deletar o setor
+                                            document.getElementById('subsector-list').innerHTML = '';
+                                        } else {
+                                            console.log("Erro ao deletar o setor:", sectorId);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Erro ao enviar a solicitação de exclusão:", error);
+                                    });
+                                }
+                        
+                                function showSubsectors(sectorId) {
+                                    console.log("showSubsectors chamado para o setor:", sectorId);
+                        
+                                    fetch(`/get_subsectors/${sectorId}/`)
+                                    .then(response => {
+                                        if (!response.ok) {
+                                            throw new Error('Network response was not ok');
+                                        }
+                                        return response.json();
+                                    })
+                                    .then(data => {
+                                        console.log(data); // Log the data for debugging
+                                        const subsectorList = document.getElementById('subsector-list');
+                                        subsectorList.innerHTML = ''; // Limpar lista de subsetores
 
-                            function deleteSubsector(subsectorId) {
-                                console.log("Deletar subsector com ID:", subsectorId);
+                                        if (data.subsectors) {
+                                            data.subsectors.forEach(subsector => {
+                                                const li = document.createElement('li');
+                                                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                                li.textContent = subsector.name;
+                                                li.setAttribute('data-id', subsector.id); // Adicionar data-id ao elemento li
 
-                                // Envia uma solicitação de exclusão para o servidor (exemplo de como isso pode ser feito com AJAX)
-                                fetch(`/delete_subsector/${subsectorId}/`, {
-                                    method: 'DELETE',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
-                                    }
-                                })
-                                .then(response => {
-                                    if (response.ok) {
-                                        console.log("Subsector deletado com sucesso:", subsectorId);
-                                        // Remover o subsetor do DOM
-                                        document.querySelector(`#subsector-list li[data-id='${subsectorId}']`).remove();
-                                    } else {
-                                        console.log("Erro ao deletar o subsector:", subsectorId);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Erro ao enviar a solicitação de exclusão:", error);
-                                });
-                            }
+                                                // Cria o botão de exclusão
+                                                const deleteButton = document.createElement('a');
+                                                deleteButton.className = 'btn btn-outline-danger btn-sm';
+                                                deleteButton.innerHTML = '<i class="nf nf-md-delete"></i>';
+                                                deleteButton.href = '#';
+                                                deleteButton.onclick = function(event) {
+                                                    event.preventDefault();
+                                                    deleteSubsector(subsector.id);
+                                                };
 
-                            function deleteSector(sectorId, event) {
-                                event.preventDefault(); // Previne o comportamento padrão do link
-                                event.stopPropagation(); // Impedir que o clique no botão de exclusão acione a função showSubsectors
-                                console.log("Deletar setor com ID:", sectorId);
+                                                // Adiciona o botão de exclusão ao item da lista
+                                                li.appendChild(deleteButton);
+                                                subsectorList.appendChild(li);
+                                            });
+                                        } else {
+                                            console.log("Nenhum subsetor encontrado para o setor:", sectorId);
+                                        }
+                                    })
+                                    .catch(error => console.error('Erro ao carregar os subsetores:', error));
 
-                                // Envia uma solicitação de exclusão para o servidor (exemplo de como isso pode ser feito com AJAX)
-                                fetch(`/preferences/sector/delete/${sectorId}/`, {
-                                    method: 'POST',
-                                    headers: {
-                                        'Content-Type': 'application/json',
-                                        'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
-                                    }
-                                })
-                                .then(response => {
-                                    if (response.ok) {
-                                        console.log("Setor deletado com sucesso:", sectorId);
-                                        // Remover o setor do DOM
-                                        document.querySelector(`#sector-list li[onclick='showSubsectors("${sectorId}")']`).remove();
-                                    } else {
-                                        console.log("Erro ao deletar o setor:", sectorId);
-                                    }
-                                })
-                                .catch(error => {
-                                    console.error("Erro ao enviar a solicitação de exclusão:", error);
-                                });
-                            }
+                                }
+                        
+                                function deleteSubsector(subsectorId) {
+                                    console.log("Deletar subsector com ID:", subsectorId);
+                        
+                                    fetch(`/preferences/subsector/delete/${subsectorId}/`, {
+                                        method: 'POST', // Certifique-se de que o método é POST
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': '{{ csrf_token }}' // Certifique-se de que o CSRF token está disponível
+                                        },
+                                        body: JSON.stringify({
+                                            csrfmiddlewaretoken: '{{ csrf_token }}' // Inclui o token CSRF no corpo da solicitação
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            console.log("Subsector deletado com sucesso:", subsectorId);
+                                            // Remover o subsetor do DOM
+                                            document.querySelector(`#subsector-list li[data-id='${subsectorId}']`).remove();
+                                        } else {
+                                            console.log("Erro ao deletar o subsector:", subsectorId);
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error("Erro ao enviar a solicitação de exclusão:", error);
+                                    });
+                                }
+                            });
                         </script>
                     </div>
                     <div class="col-4">

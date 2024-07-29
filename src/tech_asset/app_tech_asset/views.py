@@ -196,12 +196,14 @@ def new_sector(request):
 
     else:
         sectorform = SectorForm()
-
+    
 def delete_sector(request, id):
     sector = get_object_or_404(Sector, id=id)
     if request.method == 'POST':
-        sector.delete()
-        return redirect('list_asset')
+        sector.delete() 
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
 
 # SUBSECTOR --------------------------------------------------------------------------------------
 def new_subsector(request):
@@ -220,7 +222,9 @@ def delete_subsector(request, id):
     subsector = get_object_or_404(SubSector, id=id)
     if request.method == 'POST':
         subsector.delete()
-        return redirect('list_asset')
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
     
 # KITS ---------------------------------------------------------------------------------------------
 def new_kit(request):
@@ -611,10 +615,18 @@ def history(request, id):
 # THE FOLLOWING VIEWS WILL HANDLE SOME GENERAL UTILITIES
 #=============================================================================================
 
-def get_subsectors(request):
-    sector_id = request.GET.get('sector_id')
-    subsectors = SubSector.objects.filter(parent_id=sector_id).values('id', 'name')
-    return JsonResponse({'subsectors': list(subsectors)})
+def get_sectors(request):
+    sectors = Sector.objects.all()
+    sector_list = [{'id': sector.id, 'name': sector.name} for sector in sectors]
+    print(sector_list)
+    return JsonResponse({'sectors': sector_list})
+
+def get_subsectors(request, id):
+    sector = get_object_or_404(Sector, id=id)
+    subsectors = sector.subsector_set.all()
+    subsector_list = [{'id': subsector.id, 'name': subsector.name} for subsector in subsectors]
+    print(subsector_list)
+    return JsonResponse({'subsectors': subsector_list})
 
 def get_subcategories(request):
     category_id = request.GET.get('category_id')
