@@ -192,10 +192,11 @@ def new_sector(request):
         if sectorform.is_valid():
             new_sector = Sector(name=sectorform.cleaned_data['Novo_Setor'])
             new_sector.save()            
-            return redirect('list_asset')
+            return JsonResponse({'success': True, 'sector': {'id': new_sector.id, 'name': new_sector.name}})
+        else:
+            return JsonResponse({'success': False, 'errors': sectorform.errors})
 
-    else:
-        sectorform = SectorForm()
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
     
 def delete_sector(request, id):
     sector = get_object_or_404(Sector, id=id)
@@ -214,9 +215,11 @@ def new_subsector(request):
             new_subsector_name = subsectorform.cleaned_data['Novo_SubSetor']
             new_subsector = SubSector(name=new_subsector_name, parent=parent_sector)
             new_subsector.save()
-            return redirect('list_asset')
-    else:
-        subsectorform = SubSectorForm()
+            return JsonResponse({'success': True, 'subsector': {'id': new_subsector.id, 'name': new_subsector.name, 'parent_id': parent_sector.id}})
+        else:
+            return JsonResponse({'success': False, 'errors': subsectorform.errors})
+
+    return JsonResponse({'success': False, 'message': 'Invalid request method'})
 
 def delete_subsector(request, id):
     subsector = get_object_or_404(SubSector, id=id)
