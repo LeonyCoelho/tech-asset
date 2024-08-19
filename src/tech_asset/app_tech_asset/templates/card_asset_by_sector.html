@@ -1,0 +1,38 @@
+{% block card_asset_by_sector %}
+{% load static %}
+
+<div class="card">
+    <div class="card-header">
+        Setores e Subsetores
+    </div>
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <input type="text" id="sector_search" class="form-control ms-auto ms-3" placeholder="Buscar Setor / Subsetor">
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <div class="asset-by-sector-list">
+                    <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
+                        <ul class="list-group" id="sector-list">
+                            <!-- Setores serão inseridos aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-8">
+                <div class="asset-by-sector-list">
+                    <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                        <ul class="list-group" id="subsector-list">
+                            <!-- Subsetores serão inseridos aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/sector_subsector_list.js' %}"></script>
+
+
+
+{% endblock %}

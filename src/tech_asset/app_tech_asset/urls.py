@@ -35,8 +35,12 @@ urlpatterns = [
     path('kit/transfer/<int:id>/', views.transfer_kit, name='transfer_kit'),
     path('kit/edit/<int:id>/', views.edit_kit, name='edit_kit'),
  
+    path('sector/view/<int:id>/', views.view_sector, name='view_sector'),
+    path('subsector/view/<int:id>/', views.view_subsector, name='view_subsector'),
+
     path('get_sectors/', views.get_sectors, name='get_sectors'),  # Para carregar os setores dinamicamente
     path('get_subsectors/<int:id>/', views.get_subsectors, name='get_subsectors'),
+    path('get_subsectors_by_parent/', views.get_subsectors_by_parent, name='get_subsectors_by_parent'),
     path('get_subcategories/', views.get_subcategories, name='get_subcategories'),
 
 ]

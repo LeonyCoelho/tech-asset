@@ -1,0 +1,146 @@
+{% block card_new_asset %}
+{% load static %}
+
+    <div class="card">
+            <div class="card-header">
+                Novo Ativo
+            </div>
+            <div class="card-body">
+                {% if messages %}
+                    <div class="alert alert-info">
+                        {% for message in messages %}
+                            <p>{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+                <form method="post" action="{% url 'new_asset' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <label for="id_name">Nome:</label>
+                            <input type="text" name="name" id="id_name" class="form-control" maxlength="50" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="id_category">Categoria:</label>
+                            <select name="category" id="id_category" class="form-select" required>
+                                <option hidden selected disabled value="">Selecione uma Categoria</option>
+                                {% for category in categories %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_subcategory">Subcategoria:</label>
+                            <select name="subcategory" id="id_subcategory" class="form-select">
+                                <option hidden selected disabled value="">Selecione uma Subcategoria</option>
+
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_sector">Setor:</label>
+                            <select name="sector" id="id_sector" class="form-select" required>
+                                {% for sector in sectors %}
+                                <option hidden selected disabled value="">Selecione um Setor</option>
+                                <option value="{{ sector.id }}">{{ sector.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_subsector">SubSetor:</label>
+                            <select name="subsector" id="id_subsector" class="form-select">
+                                <option hidden selected disabled value="">Selecione uma Subsetor</option>
+
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="id_rental_company">Empresa:</label>
+                            <select name="rental_company" id="id_rental_company" class="form-select" required>
+                                {% for rental_company in rental_companies %}
+                                <option hidden selected disabled value="">Selecione uma Empresa</option>
+                                <option value="{{ rental_company.id }}">{{ rental_company.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_internal_code1">{% if global_settings.internalcode1 %}{{ global_settings.internal_code1 }}{% else %} Codigo Interno 1 {% endif %}:</label>
+                            <input type="text" name="internal_code1" id="id_internal_code1" class="form-control" maxlength="50">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_internal_code2">{% if global_settings.internalcode2 %}{{ global_settings.internal_code2 }}{% else %} Codigo Interno 2 {% endif %}:</label>
+                            <input type="text" name="internal_code2" id="id_internal_code2" class="form-control" maxlength="50">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_internal_code3">{% if global_settings.internalcode3 %}{{ global_settings.internal_code3 }}{% else %} Codigo Interno 3 {% endif %}:</label>
+                            <input type="text" name="internal_code3" id="id_internal_code3" class="form-control" maxlength="50">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label for="id_serial_number">Numero de Série:</label>
+                            <input type="text" name="serial_number" id="id_serial_number" class="form-control" maxlength="50">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_brand">Marca:</label>
+                            <input type="text" name="brand" id="id_brand" class="form-control" maxlength="50">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_mac_address">MAC Address:</label>
+                            <input type="text" name="mac_address" id="id_mac_address" class="form-control" maxlength="50">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="id_windows_license">Licença Windows:</label>
+                            <input type="text" name="windows_license" id="id_windows_license" class="form-control" maxlength="50">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Concluir</button>
+                </form>
+                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+                <script>
+                    $(document).ready(function(){
+                        $('#id_sector').change(function(){
+                            var sector_id = $(this).val();
+                            $.ajax({
+                                url: '/get_subsectors_by_parent/',
+                                data: {'sector_id': sector_id},
+                                dataType: 'json',
+                                success: function(data){
+                                    $('#id_subsector').empty();
+                                    $.each(data.subsectors, function(index, subsector){
+                                        $('#id_subsector').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                                    });
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error:", error);
+                                }
+                            });
+                        });
+                        $('#id_category').change(function(){
+                            var category_id = $(this).val();
+                            $.ajax({
+                                url: '/get_subcategories/',
+                                data: {'category_id': category_id},
+                                dataType: 'json',
+                                success: function(data){
+                                    $('#id_subcategory').empty();
+                                    $.each(data.subcategories, function(index, subcategory){
+                                        $('#id_subcategory').append('<option value="' + subcategory.id + '">' + subcategory.name + '</option>');
+                                    });
+                                },
+                                error: function(xhr, status, error) {
+                                    console.error("Error:", error);
+                                }
+                            });
+                        });
+                    });
+                </script>
+
+            </div>
+        
+    </div>
+
+
+{% endblock %}

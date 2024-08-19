@@ -1,0 +1,163 @@
+{% block sector_card %}
+{% load static %}
+<script src="https://cdn.jsdelivr.net/npm/masonry-layout@4.2.2/dist/masonry.pkgd.min.js" integrity="sha384-GNFwBvfVxBkLMJpYMOABq3c+d3KnQxudP/mGPkzpZSTYykLBNsZEnG2D9G/X/+7D" crossorigin="anonymous" async></script>
+
+<div class="row" data-masonry='{"percentPosition": true }'>
+    {% for kit in kits %}
+    <div class="col-4">
+        <div class="card mb-3">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col">
+                        {{ kit.id }} - {{ kit.name }}
+                    </div>
+                    <div class="col-auto">
+                        <span class="badge text-bg-secondary">{{ kit.asset_set.count }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <a href="{% url 'view_kit' kit.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-fa-eye"></i></a>
+                        <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferKitModal{{ kit.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
+                        <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#editKitModal{{ kit.id }}"><i class="nf nf-md-playlist_edit"></i></a>
+                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteKitModal{{ kit.id }}"><i class="nf nf-md-delete"></i></button>
+                    </li>
+                    {% if kit.asset_set.count >= 1  %}
+                    {% for asset in kit.asset_set.all %}
+                    <li class="list-group-item" onclick="location.href='/asset/view/{{asset.id}}'" style="cursor: pointer;">{{ asset.id }} - {{ asset.name }} - {{ asset.internal_code1 }}</li>           
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="mt-2">
+                    Nenhum equipamento atribuido
+                </div> 
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div> 
+
+{% for kit in kits %}
+
+    <!-- Transfer Kit Modal =========================================================================================================================== -->
+
+    <div class="modal fade" id="transferKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="transferKitModalLabel{{ kit.id }}" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="transferKitModalLabel{{ kit.id }}">Transfer {{ kit.name }}</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" action="{% url 'transfer_kit' kit.id %}">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="id_sector_t_{{kit.id}}">Setor:</label>
+                                    <select name="sector" id="id_sector_t_{{kit.id}}" class="form-select" required>
+                                        <option value="" hidden selected disabled>Selecione</option>
+                                        {% for sector in sectors %}
+                                        <option value="{{ sector.id }}">{{ sector.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if kit.sector %}<p>Atual: {{ kit.sector }}</p>{% endif %}
+                                </div>
+                                <div class="col-6">
+                                    <label for="id_subsector_t_{{kit.id}}">SubSetor:</label>
+                                    <select name="subsector" id="id_subsector_t_{{kit.id}}" class="form-select">
+                                        <option value="" hidden selected disabled>Selecione</option>
+                                    </select>
+                                    {% if kit.subsector %}<p>Atual: {{ kit.subsector }}</p>{% endif %}
+                                </div>
+                            </div>
+                        </div>             
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                            <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                        </div>
+                    </form>           
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <script>
+        $(document).ready(function(){
+            console.log("Sector / Subsector script started");
+            $('#id_sector_t_{{kit.id}}').change(function(){
+                console.log("Setor change event");
+                var sector_id = $(this).val();
+                $.ajax({
+                    url: '/get_subsectors_by_parent/',
+                    data: {'sector_id': sector_id},
+                    dataType: 'json',
+                    success: function(data){
+                        console.log("Subsectors received:", data.subsectors);
+                        $('#id_subsector_t_{{kit.id}}').empty();
+                        $.each(data.subsectors, function(index, subsector){
+                            $('#id_subsector_t_{{kit.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                        });
+                    },
+                    error: function(xhr, status, error) {
+                        console.error("Error:", error);
+                    }
+                });
+            });
+        });
+    </script>
+
+<!-- Edit Kit Modal ============================================================================================================================-->
+
+<div class="modal fade" id="editKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="editKitModalLabel{{ kit.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editKitModalLabel{{ kit.id }}">Edit {{ kit.name }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'edit_kit' kit.id %}">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                            <label type="form-label">Nome do kit</label>
+                            <input type="text" class="form-control" name="name" placeholder="{{kit.name}}">
+                    </div>             
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                        <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                    </div>
+                </form>           
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal =================================================================================================================-->
+
+<div class="modal fade" id="deleteKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="deleteKitModalLabel{{ kit.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteKitModalLabel{{ kit.id }}">Deseja remover {{ kit.name }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'delete_kit' kit.id %}">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endfor %}
+
+{% endblock %}

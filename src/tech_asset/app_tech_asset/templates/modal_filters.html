@@ -1,0 +1,69 @@
+{% block modal_filters %}
+{% load static %}
+
+            <!-- Modal -->
+            <div class="modal fade" id="filterModal" tabindex="-1" aria-labelledby="filterModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="filterModalLabel">Filtrar Assets</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                    <form id="filterForm">
+                        <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Nome">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="sector" name="sector" placeholder="Setor">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="subsector" name="subsector" placeholder="Subsetor">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="category" name="category" placeholder="Categoria">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="subcategory" name="subcategory" placeholder="SubCategoria">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="rentalcompany" name="rentalcompany" placeholder="Empresa">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="internalcode1" name="internalcode1" placeholder="{{global_settings.internalcode01}}">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="internalcode2" name="internalcode2" placeholder="{{global_settings.internalcode02}}">
+                            </div>
+                            <div class="mb-3">
+                            <input type="text" class="form-control" id="internalcode3" name="internalcode3" placeholder="{{global_settings.internalcode03}}">
+                            </div>
+                        </div>
+                        </div>
+                    </form>
+                    </div>
+                    <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                    <button type="button" class="btn btn-primary" onclick="submitFilterForm()">Filtrar</button>
+                    </div>
+                </div>
+                </div>    
+                    <script>
+                        function submitFilterForm() {
+                            const form = document.getElementById('filterForm');
+                            const formData = new FormData(form);
+                            
+                            // Convert FormData to URL-encoded string
+                            const params = new URLSearchParams(formData);
+                            
+                            // Redirect to the filter view with the query parameters
+                            window.location.href = `/filter_assets?${params.toString()}`;
+                        }
+                    </script>
+            </div>
+
+{% endblock %}

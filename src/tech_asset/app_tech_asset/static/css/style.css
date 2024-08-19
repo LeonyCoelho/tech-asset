@@ -1,7 +1,7 @@
 @import "https://www.nerdfonts.com/assets/css/webfont.css";
 
 body{
-    background-color: lightsteelblue;
+    background-color: var(--bs-primary-bg-subtle);
 }
 
 .bd-placeholder-img {
@@ -47,6 +47,13 @@ body{
     overflow-y: auto;
     overflow-x: hidden; /* Hide horizontal scrollbar */
 }
+
+.asset-by-sector-list {
+    height: 396px;
+    overflow-y: auto;
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+}
+
 .kit-list {
     height: 396px;
     overflow-y: auto;
@@ -119,4 +126,8 @@ body{
     .logo_print{
     height: 40px;
     }
+}
+
+.li-hover{
+    cursor: pointer;
 }

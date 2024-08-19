@@ -14,24 +14,31 @@ from io import BytesIO
 
 def home(request):
     asset_list = Asset.objects.all()
+    sector_list = Sector.objects.all()
+    subsector_list = SubSector.objects.all()
     sector_list_alt = Sector.objects.prefetch_related('subsector_set').all()
     subsector_list_alt = SubSector.objects.all()
-
+    kit_list = Kit.objects.all()
 
     sectorform = SectorForm()
     subsectorform = SubSectorForm()
+    kitform = KitForm()
 
-    # Adicionando paginação
     paginator = Paginator(asset_list, 20)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
     context = {
         'page_obj': page_obj,
+        'asset_list': asset_list,
+        'sector_list': sector_list,
+        'subsector_list': subsector_list,
         'sector_list_alt': sector_list_alt,
         'subsector_list_alt': subsector_list_alt,
+        'kit_list': kit_list,
         'sectorform': sectorform,
         'subsectorform': subsectorform,
+        'kitform': kitform,        
     }
     return render(request, 'home.html', context)
 
@@ -160,6 +167,105 @@ def global_settings(request):
 
     return render(request, 'global_settings.html', {'globalform': globalform})
 
+def view_kit(request, id):
+    kit = get_object_or_404(Kit, id=id)
+
+    history_list = KitHistory.objects.filter(kit_id=kit).order_by('-modified')
+    
+    paginator = Paginator(history_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    asset_list = Asset.objects.all()
+    sector_list = Sector.objects.all()
+    subsector_list = SubSector.objects.all()
+    sector_list_alt = Sector.objects.prefetch_related('subsector_set').all()
+    subsector_list_alt = SubSector.objects.all()
+    kit_list = Kit.objects.all()
+    context = {
+        'kit': kit,
+        'asset_list': asset_list,
+        'sector_list': sector_list,
+        'subsector_list': subsector_list,
+        'sector_list_alt': sector_list_alt,
+        'subsector_list_alt': subsector_list_alt,
+        'page_obj': page_obj,
+        'kit_list': kit_list,
+    }
+    return render(request, 'view_kit.html', context)
+
+def view_asset(request, id):
+    # Recuperar o ativo existente
+    asset = get_object_or_404(Asset, id=id)
+    history_list = AssetHistory.objects.filter(asset_id=asset).order_by('-modified')
+    
+    paginator = Paginator(history_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    if request.method == 'POST':
+        # Processar o formulário enviado
+        asset.name = request.POST.get('name')
+        asset.rental_company = get_object_or_404(RentalCompany, id=request.POST.get('rental_company'))
+        asset.internal_code1 = request.POST.get('internal_code1')
+        asset.internal_code2 = request.POST.get('internal_code2')
+        asset.internal_code3 = request.POST.get('internal_code3')
+        asset.serial_number = request.POST.get('serial_number')
+        asset.brand = request.POST.get('brand')
+        asset.mac_address = request.POST.get('mac_address')
+        asset.windows_license = request.POST.get('windows_license')
+        
+        asset.save()
+        
+        return redirect('home')
+    
+    else:
+        
+        context = {
+            'asset': asset,
+            'page_obj': page_obj,
+        }
+        
+        return render(request, 'view_asset.html', context)
+
+def view_sector(request, id):
+    sector = get_object_or_404(Sector, id=id)
+    kits = sector.kit_set.all()  # Supondo que a relação entre Sector e Kit seja via `kit_set`
+    assets = sector.asset_set.all()
+
+    context = {
+        'sector': sector,
+        'kits': kits,
+        'assets': assets,
+    }
+    return render(request, 'view_sector.html', context)
+
+def view_subsector(request, id):
+    subsector = get_object_or_404(SubSector, id=id)
+    kits = subsector.kit_set.all()  # Supondo que a relação entre subSector e Kit seja via `kit_set`
+    assets = subsector.asset_set.all()
+
+    context = {
+        'subsector': subsector,
+        'kits': kits,
+        'assets': assets,
+    }
+    return render(request, 'view_subsector.html', context)
+
+def history(request, id):
+    asset = get_object_or_404(Asset, id=id)
+    history_list = AssetHistory.objects.filter(asset_id=asset).order_by('-modified')
+    
+    paginator = Paginator(history_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'asset': asset,
+        'page_obj': page_obj,
+    }
+    return render(request, 'view_asset_history.html', context)
+
 # THE FOLLOWING VIEWS WILL HANDLE CRUD OPERATIONS
 #=============================================================================================
 
@@ -254,44 +360,17 @@ def new_kit(request):
                 subsector=new_kit.subsectors.name if new_kit.subsectors else '',
             )
             
-            return redirect('list_asset')
+            return redirect('home')
         else:
             return HttpResponse("Invalid form", status=400)
     else:
-        return redirect('list_asset')
-
-def view_kit(request, id):
-    kit = get_object_or_404(Kit, id=id)
-
-    history_list = KitHistory.objects.filter(kit_id=kit).order_by('-modified')
-    
-    paginator = Paginator(history_list, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-
-    asset_list = Asset.objects.all()
-    sector_list = Sector.objects.all()
-    subsector_list = SubSector.objects.all()
-    sector_list_alt = Sector.objects.prefetch_related('subsector_set').all()
-    subsector_list_alt = SubSector.objects.all()
-    kit_list = Kit.objects.all()
-    context = {
-        'kit': kit,
-        'asset_list': asset_list,
-        'sector_list': sector_list,
-        'subsector_list': subsector_list,
-        'sector_list_alt': sector_list_alt,
-        'subsector_list_alt': subsector_list_alt,
-        'page_obj': page_obj,
-        'kit_list': kit_list,
-    }
-    return render(request, 'view_kit.html', context)
+        return redirect('home')
 
 def delete_kit(request, id):
     kit = get_object_or_404(Kit, id=id)
     if request.method == 'POST':
         kit.delete()
-        return redirect('list_asset')
+        return redirect('home')
     
 def transfer_kit(request, id):
     kit = get_object_or_404(Kit, id=id)
@@ -369,8 +448,8 @@ def transfer_kit(request, id):
             new_subsector=new_subsector.name if new_subsector else '',
         )
         
-        return redirect('list_asset')
-    return redirect('list_asset')
+        return redirect('home')
+    return redirect('home')
 
 def edit_kit(request, id):
     kit = get_object_or_404(Kit, id=id)
@@ -383,7 +462,7 @@ def edit_kit(request, id):
         user=request.user.username,
         modified=kit.modified
     )
-    return redirect('list_asset')
+    return redirect('home')
 
 # RENTAL COMPANY ---------------------------------------------------------------------------------------
 def new_rentalcompany(request):
@@ -454,50 +533,16 @@ def new_asset(request):
             windows_license=asset.windows_license
         )
 
-        return redirect('list_asset')
+        return redirect('home')
     else:
 
         return render(request, 'new_asset.html')
-    
-def view_asset(request, id):
-    # Recuperar o ativo existente
-    asset = get_object_or_404(Asset, id=id)
-    history_list = AssetHistory.objects.filter(asset_id=asset).order_by('-modified')
-    
-    paginator = Paginator(history_list, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    if request.method == 'POST':
-        # Processar o formulário enviado
-        asset.name = request.POST.get('name')
-        asset.rental_company = get_object_or_404(RentalCompany, id=request.POST.get('rental_company'))
-        asset.internal_code1 = request.POST.get('internal_code1')
-        asset.internal_code2 = request.POST.get('internal_code2')
-        asset.internal_code3 = request.POST.get('internal_code3')
-        asset.serial_number = request.POST.get('serial_number')
-        asset.brand = request.POST.get('brand')
-        asset.mac_address = request.POST.get('mac_address')
-        asset.windows_license = request.POST.get('windows_license')
-        
-        asset.save()
-        
-        return redirect('list_asset')
-    
-    else:
-        
-        context = {
-            'asset': asset,
-            'page_obj': page_obj,
-        }
-        
-        return render(request, 'view_asset.html', context)
     
 def delete_asset(request, id):
     asset = get_object_or_404(Asset, id=id)
     if request.method == 'POST':
         asset.delete()
-        return redirect('list_asset')
+        return redirect('home')
     
 def transfer_asset(request, id):
     asset = get_object_or_404(Asset, id=id)
@@ -544,8 +589,8 @@ def transfer_asset(request, id):
             new_subsector=new_subsector,
         )
         
-        return redirect('list_asset')
-    return redirect('list_asset')
+        return redirect('home')
+    return redirect('home')
 
 def edit_asset(request, id):
     # Recuperar o ativo existente
@@ -565,7 +610,7 @@ def edit_asset(request, id):
         
         asset.save()
         
-        return redirect('list_asset')
+        return redirect('home')
     
     else:
         
@@ -600,20 +645,6 @@ def generate_qr_code(request, id):
     
     response = HttpResponse(buffer, content_type='image/png')
     return response
-
-def history(request, id):
-    asset = get_object_or_404(Asset, id=id)
-    history_list = AssetHistory.objects.filter(asset_id=asset).order_by('-modified')
-    
-    paginator = Paginator(history_list, 20)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'asset': asset,
-        'page_obj': page_obj,
-    }
-    return render(request, 'history.html', context)
   
 # THE FOLLOWING VIEWS WILL HANDLE SOME GENERAL UTILITIES
 #=============================================================================================
@@ -630,6 +661,11 @@ def get_subsectors(request, id):
     subsector_list = [{'id': subsector.id, 'name': subsector.name} for subsector in subsectors]
     print(subsector_list)
     return JsonResponse({'subsectors': subsector_list})
+
+def get_subsectors_by_parent(request):
+    sector_id = request.GET.get('sector_id')
+    subsectors = SubSector.objects.filter(parent_id=sector_id).values('id', 'name')
+    return JsonResponse({'subsectors': list(subsectors)})
 
 def get_subcategories(request):
     category_id = request.GET.get('category_id')

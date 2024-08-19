@@ -1,6 +1,88 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
+<script src="{% static 'js/jsQR.js' %}"></script>
+<script>
+    console.log("jsQR script loaded: ", typeof jsQR !== 'undefined');
+</script>
+
+
+
+<div class="container mt-3">
+    <div class="accordion" id="accBtns">
+            
+<!-- ===================================== TOP BUTTONS ============================= -->
+
+        <div class="row">
+            <div class="col-xl-3 col-l-3 col-md-6 col-sm-12">
+                <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collNewAsset" aria-expanded="false" aria-controls="collNewAsset">
+                    <div class="card-body">
+                        <h4 id="headNewAsset">
+                            Novo Ativo
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-l-3 col-md-6 col-sm-12">
+                <div class="card mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collSector" aria-expanded="false" aria-controls="collSector">
+                    <div class="card-body">
+                        <h4 id="headSector">
+                            Editar Setores
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-l-3 col-md-6 col-sm-12">
+                <div class="card mb-3" type="button" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    <div class="card-body">
+                        <h4 id="headKit">
+                            Busca Avançada
+                        </h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-l-3 col-md-6 col-sm-12">
+                <div class="card mb-3" id="scanQrCodeBtn" type="button" data-bs-toggle="modal" data-bs-target="#qrCodeScanModal">
+                    <div class="card-body">
+                        <h4 id="headingThree">
+                            Escanear QR Code
+                        </h4>
+                    </div>
+                </div>
+            </div>                
+        </div>
+
+<!-- ===================================== NEW ASSET ==================================== -->
+        <div id="collNewAsset" class="accordion-collapse collapse mb-3" aria-labelledby="headNewAsset" data-bs-parent="#accBtns">
+            {% include "card_new_asset.html" %}
+        </div>
+<!-- ===================================== SECTORS AND KITS ============================= -->
+
+        <div id="collSector" class="accordion-collapse collapse mb-3" aria-labelledby="headSector" data-bs-parent="#accBtns">
+            <!-- { include "card_sectors.html" %} -->
+        </div>
+
+<!-- ===================================== FIXED CARDS ============================= -->
+        <div class="row">
+            <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12">
+                {% include "card_asset_by_sector.html" %}
+            </div>
+            <div class="col-xl-4 col-lg-4 col-md-12 col-sm-12">
+                {% include "card_kits.html" %}
+            </div>
+        </div>
+        {% include "card_list_assets.html" %}
+
+
+
+
+
+<!-- ===================================== MODALS ============================= -->
+
+        {% include "modal_filters.html" %} <!-- FILTERS -->
+        {% include "modal_qrcode_scan.html" %} <!-- QRCODE SCAN -->
+    </div>
+</div>
 
 
 

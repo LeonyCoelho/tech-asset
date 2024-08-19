@@ -1,0 +1,48 @@
+{% block sector_card %}
+{% load static %}
+
+<div class="card">
+    <div class="card-header">
+        Setores e Subsetores
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-4">
+                <form id="new-sector-form" class="mb-3">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        {{ sectorform.Novo_Setor }}
+                        <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                    </div>
+                </form>
+                <div class="sector-list">
+                    <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
+                        <ul class="list-group" id="sector-list">
+                            <!-- Setores serão inseridos aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-8">
+                <form id="new-subsector-form" class="mb-3">
+                    {% csrf_token %}
+                    <div class="input-group mb-3">
+                        {{ subsectorform.parent }}
+                        {{ subsectorform.Novo_SubSetor }}
+                        <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                    </div>
+                </form>
+                <div class="subsector-list">
+                    <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                        <ul class="list-group" id="subsector-list">
+                            <!-- Subsetores serão inseridos aqui -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="{% static 'js/sector_subsector.js' %}"></script>
+
+{% endblock %}

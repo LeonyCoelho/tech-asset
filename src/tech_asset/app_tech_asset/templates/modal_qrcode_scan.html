@@ -1,0 +1,119 @@
+{% block modal_qrcode_scan %}
+{% load static %}
+
+<div class="modal fade" id="qrCodeScanModal" tabindex="-1" aria-labelledby="qrCodeScanModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+    <div class="modal-content">
+        <div class="modal-header">
+        <h1 class="modal-title fs-5" id="qrCodeScanModalLabel">Escanear QR-Code</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <style>
+                .video-container {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    flex-direction: column;
+                    height: 100%;
+                }
+                #video {
+                    display: none;
+                }
+                #canvas {
+                    display: none;
+                    width: 100%;
+                }
+            </style>
+                <!-- <button id="scanQrCodeBtn" class="btn btn-primary mb-3">Iniciar</button> -->
+                <div class="video-container">
+                    <video id="video" width="300" height="200"></video>
+                </div>    
+                <canvas id="canvas"></canvas>
+                <div id="qrResult"></div>
+            <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            const qrCodeScanModal = document.getElementById('qrCodeScanModal');
+            qrCodeScanModal.addEventListener('shown.bs.modal', function () {
+                startQrCodeScanner();
+            });
+
+            function startQrCodeScanner() {
+                const video = document.getElementById('video');
+                const canvasElement = document.getElementById('canvas');
+                const canvas = canvasElement.getContext('2d');
+                const qrResult = document.getElementById('qrResult');
+
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function (stream) {
+                    video.srcObject = stream;
+                    video.setAttribute('playsinline', true); // iOS safari bullshit
+                    video.style.display = 'block';
+                    video.play();
+                    requestAnimationFrame(tick);
+                }).catch(function (err) {
+                    console.error("Error accessing camera: ", err);
+                    qrResult.textContent = "ERRO AO ACESSAR A CAMERA: " + err;
+                });
+
+                function tick() {
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        canvasElement.height = video.videoHeight;
+                        canvasElement.width = video.videoWidth;
+                        canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                        const imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+                            inversionAttempts: 'dontInvert',
+                        });
+                        if (code) {
+                            drawLine(code.location.topLeftCorner, code.location.topRightCorner, '#FF3B58');
+                            drawLine(code.location.topRightCorner, code.location.bottomRightCorner, '#FF3B58');
+                            drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, '#FF3B58');
+                            drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, '#FF3B58');
+                            qrResult.textContent = "QR Code Data: " + code.data;
+                            console.log("QR Code Data: ", code.data);
+                            handleQrCodeData(code.data);
+                            stopVideo();
+                        } else {
+                            qrResult.textContent = "Não foi detectado nenhum QR Code.";
+                            requestAnimationFrame(tick);
+                        }
+                    } else {
+                        requestAnimationFrame(tick);
+                    }
+                }
+
+                function drawLine(begin, end, color) {
+                    canvas.beginPath();
+                    canvas.moveTo(begin.x, begin.y);
+                    canvas.lineTo(end.x, end.y);
+                    canvas.lineWidth = 4;
+                    canvas.strokeStyle = color;
+                    canvas.stroke();
+                }
+
+                function stopVideo() {
+                    video.srcObject.getTracks().forEach(track => track.stop());
+                    video.style.display = 'none';
+                }
+
+                function handleQrCodeData(data) {
+                    const idMatch = data.match(/ID:\s*(\d+)/);
+                    if (idMatch && idMatch[1]) {
+                        const assetId = idMatch[1];
+                        window.location.href = `/asset/view/${assetId}/`;
+                    } else {
+                        qrResult.textContent = "ID não encontrado no QR Code.";
+                    }
+                }
+            }
+        });
+            </script>
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        </div>
+    </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -82,51 +82,57 @@
                 </div>
             </div>
         </div>
-        <div class="card mb-3">
-            <div class="card-header">
-                Categorias e Subcategorias
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-4">
-                        <form method="post" class="mb-3" action="{% url 'new_category' %}">
-                        {% csrf_token %}
-                        <div class="input-group">
-                            {{ categoryform.Nova_Categoria }}
-                            <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+        <div class="mb-3">
+            <div class="card">
+                    <div class="card-header">
+                        Categorias e Subcategorias
                     </div>
-                    </form>
-                    <div class="category-list">
-                        <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
-                            <ul class="list-group" id="category-list">
-                                {% for category in category_list %}
-                                <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showSubcategorys('{{ category.id }}')">
-                                    {{ category.name }}
-                                    <a href="#" class="btn btn-outline-danger btn-sm" onclick="deletecategory('{{ category.id }}', event)"><i class="nf nf-md-delete"></i></a>
-                                </li>
-                                {% endfor %}
-                            </ul>  
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-4">
+                                <form method="post" class="mb-3" action="{% url 'new_category' %}">
+                                {% csrf_token %}
+                                <div class="input-group">
+                                    {{ categoryform.Nova_Categoria }}
+                                    <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                            </div>
+                            </form>
+                            <div class="category-list">
+                                <div id="simple-list-example" class="d-flex flex-column gap-2 simple-list-example-scrollspy">
+                                    <ul class="list-group" id="category-list">
+                                        {% for category in category_list %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center" onclick="showSubcategorys('{{ category.id }}')">
+                                            {{ category.name }}
+                                            <a href="#" class="btn btn-outline-danger btn-sm" onclick="deletecategory('{{ category.id }}', event)"><i class="nf nf-md-delete"></i></a>
+                                        </li>
+                                        {% endfor %}
+                                    </ul>  
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-8">
+                            <form method="post" class="mb-3" action="{% url 'new_subcategory' %}">
+                                {% csrf_token %}                                    
+                                <div class="input-group mb-3">
+                                    {{ subcategoryform.parent }}
+                                    {{ subcategoryform.Nova_SubCategoria }}
+                                    <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
+                                </div>
+                            </form>
+                            <div class="category-list">
+                                <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
+                                    <ul class="list-group" id="subcategory-list">
+                                        <!-- Subsetores serão inseridos aqui -->
+                                    </ul>  
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-8">
-                    <form method="post" class="mb-3" action="{% url 'new_subcategory' %}">
-                        {% csrf_token %}                                    
-                        <div class="input-group mb-3">
-                            {{ subcategoryform.parent }}
-                            {{ subcategoryform.Nova_SubCategoria }}
-                            <button type="submit" class="btn btn-primary"><i class="nf nf-cod-add"></i></button>
-                        </div>
-                    </form>
-                    <div class="category-list">
-                        <div data-bs-spy="scroll" data-bs-target="#simple-list-example" data-bs-offset="0" data-bs-smooth-scroll="true" class="scrollspy-example" tabindex="0">
-                            <ul class="list-group" id="subcategory-list">
-                                <!-- Subsetores serão inseridos aqui -->
-                            </ul>  
-                        </div>
-                    </div>
-                </div>
             </div>
+        </div>
+        <div class="mb-3">
+            {% include "card_sectors.html" %}
         </div>
     </div>
 </div>
