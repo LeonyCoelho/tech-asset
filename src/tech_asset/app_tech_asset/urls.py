@@ -48,7 +48,10 @@ urlpatterns = [
     path('get_sectors/', views.get_sectors, name='get_sectors'),
     path('get_subsectors/<int:id>/', views.get_subsectors, name='get_subsectors'),
     path('get_subsectors_by_parent/', views.get_subsectors_by_parent, name='get_subsectors_by_parent'),
+
     path('api/sector_summary/<int:sector_id>/', views.sector_summary, name='sector_summary'),
+    path('api/subsector_summary/<int:subsector_id>/', views.subsector_summary, name='subsector_summary'),
+
     path('get_subcategories/', views.get_subcategories, name='get_subcategories'),
 
 ]

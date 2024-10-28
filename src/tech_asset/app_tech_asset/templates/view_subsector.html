@@ -2,18 +2,20 @@
 {% block content %}
 {% load static %}
 
-
+<div id="subsectorId" data-value="{{ subsector.id }}"></div>
 
 <div class="container mt-3">
     <div class="card mb-3">
         <div class="card-body">
-            <h1>{{ subsector.parent }} - {{ subsector.name }}</h1>
-            <h5>Total de equipamentos: {{ subsector.asset_set.count }}</h5> <!-- Supondo que tenha relação de equipamentos -->
-            <h5>Total de kits: {{ kits.count }}</h5>
+            <div class="subsector-summary" data-subsector-id="{{ subsector.id }}">
+                <h1 id="subsectorName"></h1>
+                <h5>Total de equipamentos: <span id="totalAssets">...</span></h5>
+                <h5>Total de kits: <span id="totalKits">...</span></h5>
+            </div>
         </div>
     </div>
     <div class="mt-3">
-        {% include "card_sector_kits.html" %}
+        {% include "card_subsector_kits.html" %}
     </div>
         {% include "card_list_assets_subsector.html" %}
     </div>

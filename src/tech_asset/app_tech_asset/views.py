@@ -803,6 +803,21 @@ def sector_summary(request, sector_id):
         return JsonResponse(data)
     except Sector.DoesNotExist:
         return JsonResponse({'error': 'Sector not found'}, status=404)
+    
+def subsector_summary(request, subsector_id):
+    try:
+        subsector = SubSector.objects.get(id=subsector_id)
+        total_assets = Asset.objects.filter(subsector=subsector).count()
+        total_kits = Kit.objects.filter(subsectors=subsector).count()  # substitua 'subsectors' pelo nome do campo correto
+
+        data = {
+            'subsector_name': subsector.name,
+            'total_assets': total_assets,
+            'total_kits': total_kits,
+        }
+        return JsonResponse(data)
+    except Sector.DoesNotExist:
+        return JsonResponse({'error': 'Sector not found'}, status=404)
 
 def get_subsectors_by_parent(request):
     sector_id = request.GET.get('sector_id')
