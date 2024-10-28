@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 {% block content %}
 {% load static %}
-
-
+<div id="sectorId" data-value="{{ sector.id }}"></div>
 
 <div class="container mt-3">
     <div class="card mb-3">
         <div class="card-body">
-            <h1>{{ sector.name }}</h1>
-            <h5>Total de equipamentos: {{ sector.asset_set.count }}</h5> <!-- Supondo que tenha relação de equipamentos -->
-            <h5>Total de kits: {{ kits.count }}</h5>
+            <div class="sector-summary" data-sector-id="{{ sector.id }}">
+                <h1 id="sectorName"></h1>
+                <h5>Total de equipamentos: <span id="totalAssets">...</span></h5>
+                <h5>Total de kits: <span id="totalKits">...</span></h5>
+            </div>
         </div>
     </div>
     <div class="mt-3">

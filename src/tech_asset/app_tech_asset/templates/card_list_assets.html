@@ -1,5 +1,6 @@
 {% block card_list_assets %}
 {% load static %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <div class="">
     <div class="card mb-3">
@@ -20,38 +21,46 @@
                     <th scope="col">Ações</th>
                 </tr>
                 {% for asset in page_obj %}
-                <tr>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{{ asset.id }}</td>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{{ asset.internal_code1 }}</td>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{{ asset.name }}</td>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.sector %}{{ asset.sector }}{% endif %}</td>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.subsector %}{{ asset.subsector }}{% endif %}</td>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.category %}{{ asset.category }}{% endif %}</td>
-                    <td  onclick="window.location.href='{% url 'view_asset' asset.id %}'">{% if asset.subcategory %}{{ asset.subcategory }}{% endif %}</td>
-                    <td>
-                        <a href="{% url 'view_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-fa-eye"></i></a>
-                        <a href="{% url 'edit_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
-                        <button class="btn btn-secondary btn-sm" id="generateQR{{asset.id}}" data-bs-toggle="modal" data-bs-target="#qrModal{{ asset.id }}"><i class="nf nf-md-qrcode"></i></button>
-                        {% if asset.kit %}
-                        <a class="btn btn-sm btn-secondary" href="{% url 'view_kit' asset.kit.id %}"><i class="nf nf-md-sitemap"></i></a>
-                        {% else %}
-                        <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferModal{{ asset.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
-                        {% endif %}
-                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ asset.id }}"><i class="nf nf-md-delete"></i></button>
-                    </td>
-                </tr>
+                <tbody id="asset-table-body">
+                    {% for asset in assets %}
+                        <tr>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.id }}</td>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.internal_code1 }}</td>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.name }}</td>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.sector }}</td>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.subsector }}</td>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.category }}</td>
+                            <td onclick="window.location.href='/view_asset/{{ asset.id }}'">{{ asset.subcategory }}</td>
+                            <td>
+                                <a href="/view_asset/{{ asset.id }}" class="btn btn-sm btn-secondary"><i class="nf nf-fa-eye"></i></a>
+                                <a href="/edit_asset/{{ asset.id }}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
+                                <button class="btn btn-secondary btn-sm" id="generateQR{{ asset.id }}" data-bs-toggle="modal" data-bs-target="#qrModal{{ asset.id }}"><i class="nf nf-md-qrcode"></i></button>
+                                {% if asset.kit %}
+                                    <a class="btn btn-sm btn-secondary" href="/view_kit/{{ asset.kit.id }}"><i class="nf nf-md-sitemap"></i></a>
+                                {% else %}
+                                    <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferAssetModal{{ asset.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
+                                {% endif %}
+                                <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ asset.id }}"><i class="nf nf-md-delete"></i></button>
+                            </td>
+                        </tr>
+                    
+                    {% endfor %}
+                </tbody>
+
+                
 
                 <!-- Transfer Modal ============================================================================================================================-->
 
-                <div class="modal fade" id="transferModal{{ asset.id }}" tabindex="-1" aria-labelledby="transferModalLabel{{ asset.id }}" aria-hidden="true">
+                <div class="modal fade" id="transferAssetModal{{ asset.id }}" tabindex="-1" aria-labelledby="transferAssetModalLabel{{ asset.id }}" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="transferModalLabel{{ asset.id }}">Realizar movimentação - {{ asset.name }}</h1>
+                                <h1 class="modal-title fs-5" id="transferAssetModalLabel{{ asset.id }}">Realizar movimentação - {{ asset.name }}</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="{% url 'transfer_asset' asset.id %}">
+
+                                <form id="transferAssetForm{{ asset.id }}" onsubmit="return transferAsset(event, {{ asset.id }})">
                                     {% csrf_token %}
                                     <div class="modal-body">
                                         <div class="row">
@@ -69,16 +78,20 @@
                                                 <label for="id_subsector_t_asset_{{asset.id}}">SubSetor:</label>
                                                 <select name="subsector" id="id_subsector_t_asset_{{asset.id}}" class="form-select">
                                                     <option value="" hidden selected disabled>Selecione</option>
-                                                </select>
+                                                </select> 
                                                 {% if asset.subsector %}<p>Atual: {{ asset.subsector }}</p>{% endif %}
                                             </div>
                                         </div>
                                     </div>             
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
-                                        <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                                        <button type="submit" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Concluir</button>
                                     </div>
-                                </form>           
+                                </form>   
+
+
+
+
                             </div>
                         </div>
                     </div>
@@ -86,32 +99,6 @@
 
 
                 
-                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-
-                <script>
-                    $(document).ready(function(){
-                        console.log("Sector / Subsector script started");
-                        $('#id_sector_t_asset_{{asset.id}}').change(function(){
-                            console.log("Setor change event");
-                            var sector_id = $(this).val();
-                            $.ajax({
-                                url: '/get_subsectors_by_parent/',
-                                data: {'sector_id': sector_id},
-                                dataType: 'json',
-                                success: function(data){
-                                    console.log("Subsectors received:", data.subsectors);
-                                    $('#id_subsector_t_asset_{{asset.id}}').empty();
-                                    $.each(data.subsectors, function(index, subsector){
-                                        $('#id_subsector_t_asset_{{asset.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
-                                    });
-                                },
-                                error: function(xhr, status, error) {
-                                    console.error("Error:", error);
-                                }
-                            });
-                        });
-                    });
-                </script>
 
                 <!-- QR Modal ===========================================================================================================================-->
 
@@ -140,7 +127,6 @@
                                         </div>
                                     </div>
                                 </div>
-                                <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
                                 <script>
                                     $(document).ready(function() {
                                         $('#generateQR{{asset.id}}').click(function() {
@@ -195,18 +181,43 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="{% url 'delete_asset' asset.id %}">
-                                    {% csrf_token %}
-                                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                </form>
+                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-sm btn-danger" data-bs-dismiss="modal" onclick="deleteAsset({{ asset.id }})">Delete</button>
                             </div>
                         </div>
                     </div>
                 </div>
-
+                              
+                
+                <script>
+                    $(document).ready(function(){
+                    console.log("Sector / Subsector script started");
+                    $('#id_sector_t_asset_{{asset.id}}').change(function(){
+                        console.log("Setor change event");
+                        var sector_id = $(this).val();
+                        $.ajax({
+                            url: '/get_subsectors_by_parent/',
+                            data: {'sector_id': sector_id},
+                            dataType: 'json',
+                            success: function(data){
+                                console.log("Subsectors received:", data.subsectors);
+                                $('#id_subsector_t_asset_{{asset.id}}').empty();
+                                $.each(data.subsectors, function(index, subsector){
+                                    $('#id_subsector_t_asset_{{asset.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                                });
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error:", error);
+                            }
+                        });
+                    });
+                });
+                </script>
 
                 {% endfor%}
+                <script src="{% static 'js/list_assets.js' %}"></script>
+
+
             </table>
             <nav aria-label="Page navigation">
                 <ul class="pagination justify-content-center">

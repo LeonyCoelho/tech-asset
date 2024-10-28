@@ -4,6 +4,10 @@ body{
     background-color: var(--bs-primary-bg-subtle);
 }
 
+.pagination button {
+    margin: 5px;
+}
+
 .bd-placeholder-img {
     font-size: 1.125rem;
     text-anchor: middle;

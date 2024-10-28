@@ -31,8 +31,10 @@
                         <a href="{% url 'history_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-history"></i></a>
                         <a href="{% url 'edit_asset' asset.id %}" class="btn btn-sm btn-secondary"><i class="nf nf-md-playlist_edit"></i></a>
                         <button class="btn btn-secondary btn-sm" id="generateQR{{asset.id}}" data-bs-toggle="modal" data-bs-target="#qrModal{{ asset.id }}"><i class="nf nf-md-qrcode"></i></button>
-                        <a class="btn btn-sm btn-secondary" data-bs-toggle="modal" data-bs-target="#transferModal{{ asset.id }}"><i class="nf nf-fa-arrow_right_arrow_left"></i></a>
-                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ asset.id }}"><i class="nf nf-md-delete"></i></button>
+                        {% if asset.kit %}
+                        <a class="btn btn-sm btn-secondary" href="/kit/view/{{ asset.kit.id }}"><i class="nf nf-md-sitemap"></i></a>
+                        {% else %}
+                        {% endif %}
                     </td>
                 </tr>
 
@@ -75,7 +77,7 @@
                                         <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
                                         <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
                                     </div>
-                                </form>           
+                                </form>
                             </div>
                         </div>
                     </div>

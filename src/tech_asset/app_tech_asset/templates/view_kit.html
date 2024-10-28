@@ -24,6 +24,105 @@
         </div>
     </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="{% static 'js/list_kits.js' %}"></script>
+
+<script>
+    $(document).ready(function(){
+        console.log("Sector / Subsector script started");
+        $('#id_sector_t_{{kit.id}}').change(function(){
+            console.log("Setor change event");
+            var sector_id = $(this).val();
+            $.ajax({
+                url: '/get_subsectors_by_parent/',
+                data: {'sector_id': sector_id},
+                dataType: 'json',
+                success: function(data){
+                    console.log("Subsectors received:", data.subsectors);
+                    $('#id_subsector_t_{{kit.id}}').empty();
+                    $.each(data.subsectors, function(index, subsector){
+                        $('#id_subsector_t_{{kit.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", error);
+                }
+            });
+        });
+    });
+</script>
+
+<!-- Edit Kit Modal ============================================================================================================================-->
+
+<div class="modal fade" id="editKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="editKitModalLabel{{ kit.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="editKitModalLabel{{ kit.id }}">Edit {{ kit.name }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editForm{{ kit.id }}" method="post" onsubmit="return view_editKit(event, {{ kit.id }});">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <label type="form-label">Nome do kit</label>
+                        <input type="text" class="form-control" name="name" placeholder="{{ kit.name }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
+                        <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                    </div>
+                </form>
+                       
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Modal =================================================================================================================-->
+
+<div class="modal fade" id="deleteKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="deleteKitModalLabel{{ kit.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteKitModalLabel{{ kit.id }}">Deseja remover {{ kit.name }}</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" onsubmit="return view_deleteKit(event, {{ kit.id }});">
+                    {% csrf_token %}
+                    <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-sm btn-danger" data-bs-dismiss="modal">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
 <div class="container">
     <div class="row mt-3">
         {% for asset in kit.asset_set.all %}
@@ -63,7 +162,7 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form method="post" action="{% url 'transfer_kit' kit.id %}">
+                                        <form id="transferForm{{ kit.id }}" onsubmit="return view_transferKit(event, {{ kit.id }});">
                                             {% csrf_token %}
                                             <div class="modal-body">
                                                 <div class="row">
@@ -88,7 +187,7 @@
                                             </div>             
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
-                                                <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
+                                                <button type="submit" class="btn btn-sm btn-primary" data-bs-dismiss="modal">Concluir</button>
                                             </div>
                                         </form>           
                                     </div>
@@ -96,79 +195,8 @@
                             </div>
                         </div>
 
-                        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
-                        <script>
-                            $(document).ready(function(){
-                                console.log("Sector / Subsector script started");
-                                $('#id_sector_t_{{kit.id}}').change(function(){
-                                    console.log("Setor change event");
-                                    var sector_id = $(this).val();
-                                    $.ajax({
-                                        url: '/get_subsectors_by_parent/',
-                                        data: {'sector_id': sector_id},
-                                        dataType: 'json',
-                                        success: function(data){
-                                            console.log("Subsectors received:", data.subsectors);
-                                            $('#id_subsector_t_{{kit.id}}').empty();
-                                            $.each(data.subsectors, function(index, subsector){
-                                                $('#id_subsector_t_{{kit.id}}').append('<option value="' + subsector.id + '">' + subsector.name + '</option>');
-                                            });
-                                        },
-                                        error: function(xhr, status, error) {
-                                            console.error("Error:", error);
-                                        }
-                                    });
-                                });
-                            });
-                        </script>
-
-                        <!-- Edit Kit Modal ============================================================================================================================-->
-
-                        <div class="modal fade" id="editKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="editKitModalLabel{{ kit.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="editKitModalLabel{{ kit.id }}">Edit {{ kit.name }}</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form method="post" action="{% url 'edit_kit' kit.id %}">
-                                            {% csrf_token %}
-                                            <div class="modal-body">
-                                                    <label type="form-label">Nome do kit</label>
-                                                    <input type="text" class="form-control" name="name" placeholder="{{kit.name}}">
-                                            </div>             
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Fechar</button>   
-                                                <button type="submit" class="btn btn-sm btn-primary">Concluir</button>
-                                            </div>
-                                        </form>           
-                                    </div>
-                                </div>
-                            </div>
                         </div>
-
-                        <!-- Delete Modal =================================================================================================================-->
-
-                        <div class="modal fade" id="deleteKitModal{{ kit.id }}" tabindex="-1" aria-labelledby="deleteKitModalLabel{{ kit.id }}" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h1 class="modal-title fs-5" id="deleteKitModalLabel{{ kit.id }}">Deseja remover {{ kit.name }}</h1>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <form method="post" action="{% url 'delete_kit' kit.id %}">
-                                            {% csrf_token %}
-                                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
-                                        </form>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                            </div>
                         </div>
                         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
                         <script>
@@ -315,7 +343,7 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <form method="post" action="{% url 'delete_asset' asset.id %}">
+                                        <form id="deleteForm{{ kit.id }}" onsubmit="return view_deleteKit(event, {{ kit.id }});">
                                             {% csrf_token %}
                                             <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                                             <button type="submit" class="btn btn-sm btn-danger">Delete</button>

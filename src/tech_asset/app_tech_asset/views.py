@@ -230,10 +230,14 @@ def view_asset(request, id):
 
 def view_sector(request, id):
     sector = get_object_or_404(Sector, id=id)
+    print('setor ', sector)
     kits = sector.kit_set.all()  # Supondo que a relação entre Sector e Kit seja via `kit_set`
     assets = sector.asset_set.all()
 
     context = {
+        'data': {
+            'assets': assets,
+        },
         'sector': sector,
         'kits': kits,
         'assets': assets,
@@ -311,7 +315,6 @@ def delete_sector(request, id):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 
-
 # SUBSECTOR --------------------------------------------------------------------------------------
 def new_subsector(request):
     if request.method == 'POST':
@@ -334,7 +337,6 @@ def delete_subsector(request, id):
         return JsonResponse({'success': True})
     return JsonResponse({'success': False}, status=400)
 
-    
 # KITS ---------------------------------------------------------------------------------------------
 def new_kit(request):
     if request.method == 'POST':
@@ -370,7 +372,15 @@ def delete_kit(request, id):
     kit = get_object_or_404(Kit, id=id)
     if request.method == 'POST':
         kit.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
+def view_delete_kit(request, id):
+    kit = get_object_or_404(Kit, id=id)
+    if request.method == 'POST':
+        kit.delete()
         return redirect('home')
+    return JsonResponse({'success': False}, status=400)
     
 def transfer_kit(request, id):
     kit = get_object_or_404(Kit, id=id)
@@ -448,8 +458,8 @@ def transfer_kit(request, id):
             new_subsector=new_subsector.name if new_subsector else '',
         )
         
-        return redirect('home')
-    return redirect('home')
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
 
 def edit_kit(request, id):
     kit = get_object_or_404(Kit, id=id)
@@ -462,7 +472,8 @@ def edit_kit(request, id):
         user=request.user.username,
         modified=kit.modified
     )
-    return redirect('home')
+    return JsonResponse({'success': True})
+
 
 # RENTAL COMPANY ---------------------------------------------------------------------------------------
 def new_rentalcompany(request):
@@ -542,10 +553,22 @@ def delete_asset(request, id):
     asset = get_object_or_404(Asset, id=id)
     if request.method == 'POST':
         asset.delete()
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
+
+def view_delete_asset(request, id):
+    asset = get_object_or_404(Asset, id=id)
+    if request.method == 'POST':
+        asset.delete()
         return redirect('home')
+    return JsonResponse({'success': False}, status=400)
     
 def transfer_asset(request, id):
     asset = get_object_or_404(Asset, id=id)
+
+    new_sector = None
+    new_subsector = None
+
     if request.method == 'POST':
         new_sector_id = request.POST.get('sector')
         new_subsector_id = request.POST.get('subsector')
@@ -554,16 +577,33 @@ def transfer_asset(request, id):
         previous_sector = asset.sector
         previous_subsector = asset.subsector
         
+
+
         if new_sector_id:
-            new_sector = get_object_or_404(Sector, id=new_sector_id)
-            asset.sector = new_sector
+            try:
+                new_sector = get_object_or_404(Sector, id=new_sector_id)
+                asset.sector = new_sector
+            except Exception as e:
+                print(f"Error finding sector: {e}")
+                raise e
+
         if new_subsector_id:
-            new_subsector = get_object_or_404(SubSector, id=new_subsector_id)
-            asset.subsector = new_subsector
+            try:
+                new_subsector = get_object_or_404(SubSector, id=new_subsector_id)
+                asset.subsector = new_subsector
+            except Exception as e:
+                print(f"Error finding subsector: {e}")
+                raise e
         else:
             new_subsector = None
             asset.subsector = None
-        asset.save()
+        
+        try:
+            asset.save()
+            # Restante do código...
+        except Exception as e:
+            print(f"Error saving asset: {e}")
+            raise e
         
         # Criar registro no histórico
         AssetHistory.objects.create(
@@ -589,8 +629,8 @@ def transfer_asset(request, id):
             new_subsector=new_subsector,
         )
         
-        return redirect('home')
-    return redirect('home')
+        return JsonResponse({'status': 'success'})
+    return JsonResponse({'status': 'fail'}, status=400)
 
 def edit_asset(request, id):
     # Recuperar o ativo existente
@@ -649,6 +689,93 @@ def generate_qr_code(request, id):
 # THE FOLLOWING VIEWS WILL HANDLE SOME GENERAL UTILITIES
 #=============================================================================================
 
+def get_all_assets(request):
+    asset = Asset.objects.all()
+    asset_list = [{
+        'id': asset.id,
+        'internal_code1': asset.internal_code1,
+        'name': asset.name,
+        'sector': asset.sector.name if asset.sector else None,
+        'subsector': asset.subsector.name if asset.subsector else None,
+        'category': asset.category.name if asset.category else None,
+        'subcategory': asset.subcategory.name if asset.subcategory else None,
+        'kit': {
+            'id': asset.kit.id if asset.kit else None,
+            'name': asset.kit.name if asset.kit else None,
+        } if asset.kit else None
+    } for asset in asset]
+    return JsonResponse({'asset': asset_list})
+
+
+def get_all_kits(request):
+    kits = Kit.objects.all()
+    kit_list = [{
+        'id': kit.id,
+        'name': kit.name,
+        'sectors': kit.sectors.name if kit.sectors else None,
+        'subsectors': kit.subsectors.name if kit.subsectors else None,
+        'assets': [
+            {
+                'id': asset.id,
+                'name': asset.name,
+                'internal_code1': asset.internal_code1
+            }
+            for asset in kit.asset_set.all()
+        ]
+    } for kit in kits]
+    return JsonResponse({'kit': kit_list})
+
+def get_all_sector_kit(request, id):
+    # O id passado na URL já é o sector_id
+    print(f"ID recebido: {id}")
+    kits = Kit.objects.filter(sectors__id=id)
+    
+    kit_list = [{
+        'id': kit.id,
+        'name': kit.name,
+        'count': kit.asset_set.count(),
+        'sectors': kit.sectors.name if kit.sectors else None,
+        'subsectors': kit.subsectors.name if kit.subsectors else None,
+        'assets': [
+            {
+                'id': asset.id,
+                'name': asset.name,
+                'internal_code1': asset.internal_code1
+            }
+            for asset in kit.asset_set.all()
+        ]
+    } for kit in kits]
+    
+    return JsonResponse({'kit': kit_list})
+
+def get_assets_by_sector(request, id):
+    try:
+        # Filtrar ativos que pertencem ao setor especificado e que não estão atribuídos a nenhum kit
+        assets = Asset.objects.filter(sector_id=id, kit__isnull=True)
+        
+        if not assets.exists():
+            return JsonResponse({'assets': [], 'totalPages': 0, 'currentPage': 1})
+        
+        paginator = Paginator(assets, 10)  # 10 itens por página
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+        assets_data = list(page_obj.object_list.values())
+        
+        response_data = {
+            'assets': assets_data,
+            'totalPages': paginator.num_pages,
+            'currentPage': page_obj.number,
+        }
+        return JsonResponse(response_data)
+
+    except Exception as e:
+        print(f"Erro ao carregar ativos: {e}")
+        return JsonResponse({'error': 'Erro ao carregar ativos'}, status=500)
+
+
+
+
 def get_sectors(request):
     sectors = Sector.objects.all()
     sector_list = [{'id': sector.id, 'name': sector.name} for sector in sectors]
@@ -661,6 +788,21 @@ def get_subsectors(request, id):
     subsector_list = [{'id': subsector.id, 'name': subsector.name} for subsector in subsectors]
     print(subsector_list)
     return JsonResponse({'subsectors': subsector_list})
+
+def sector_summary(request, sector_id):
+    try:
+        sector = Sector.objects.get(id=sector_id)
+        total_assets = Asset.objects.filter(sector=sector).count()
+        total_kits = Kit.objects.filter(sectors=sector).count()  # substitua 'sectors' pelo nome do campo correto
+
+        data = {
+            'sector_name': sector.name,
+            'total_assets': total_assets,
+            'total_kits': total_kits,
+        }
+        return JsonResponse(data)
+    except Sector.DoesNotExist:
+        return JsonResponse({'error': 'Sector not found'}, status=404)
 
 def get_subsectors_by_parent(request):
     sector_id = request.GET.get('sector_id')

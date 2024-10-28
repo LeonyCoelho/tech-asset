@@ -39,6 +39,8 @@
                 </div>
             </div>
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+            <script src="{% static 'js/list_assets.js' %}"></script>
+
             <script>
                 $(document).ready(function() {
                     
@@ -251,11 +253,11 @@
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ asset.id }}">Deseja remover {{ asset.name }}</h1>
+                                <h1 class="modal-title fs-5" id="deleteModalLabel{{ asset.id }}">Deseja remover {{ asset.name }} TESTE</h1>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="{% url 'delete_asset' asset.id %}">
+                                <form onsubmit="return view_deleteAsset(event, {{ asset.id }});">
                                     {% csrf_token %}
                                     <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>
@@ -276,7 +278,7 @@
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <form method="post" action="{% url 'transfer_asset' asset.id %}">
+                                <form id="transferAssetForm{{ asset.id }}" onsubmit="return view_transferAsset(event, {{ asset.id }});">
                                     {% csrf_token %}
                                     <div class="modal-body">
                                         <div class="row">
