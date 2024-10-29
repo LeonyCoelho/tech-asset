@@ -44,7 +44,10 @@ urlpatterns = [
     path('get_all_kits/', views.get_all_kits, name='get_all_kits'),
     path('get_all_assets/', views.get_all_assets, name='get_all_assets'),
     path('get_all_sector_kit/<int:id>', views.get_all_sector_kit, name='get_all_sector_kit'),
+
     path('get_assets_by_sector/<int:id>/', views.get_assets_by_sector, name='get_assets_by_sector'),
+    path('get_assets_by_subsector/<int:id>/', views.get_assets_by_subsector, name='get_assets_by_subsector'),
+
     path('get_sectors/', views.get_sectors, name='get_sectors'),
     path('get_subsectors/<int:id>/', views.get_subsectors, name='get_subsectors'),
     path('get_subsectors_by_parent/', views.get_subsectors_by_parent, name='get_subsectors_by_parent'),

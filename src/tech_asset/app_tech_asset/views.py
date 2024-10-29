@@ -250,6 +250,9 @@ def view_subsector(request, id):
     assets = subsector.asset_set.all()
 
     context = {
+        'data': {
+            'assets': assets,
+        },
         'subsector': subsector,
         'kits': kits,
         'assets': assets,
@@ -773,8 +776,30 @@ def get_assets_by_sector(request, id):
         print(f"Erro ao carregar ativos: {e}")
         return JsonResponse({'error': 'Erro ao carregar ativos'}, status=500)
 
+def get_assets_by_subsector(request, id):
+    try:
+        # Filtrar ativos que pertencem ao setor especificado e que não estão atribuídos a nenhum kit
+        assets = Asset.objects.filter(subsector_id=id, kit__isnull=True)
+        
+        if not assets.exists():
+            return JsonResponse({'assets': [], 'totalPages': 0, 'currentPage': 1})
+        
+        paginator = Paginator(assets, 10)  # 10 itens por página
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
 
+        assets_data = list(page_obj.object_list.values())
+        
+        response_data = {
+            'assets': assets_data,
+            'totalPages': paginator.num_pages,
+            'currentPage': page_obj.number,
+        }
+        return JsonResponse(response_data)
 
+    except Exception as e:
+        print(f"Erro ao carregar ativos: {e}")
+        return JsonResponse({'error': 'Erro ao carregar ativos'}, status=500)
 
 def get_sectors(request):
     sectors = Sector.objects.all()
